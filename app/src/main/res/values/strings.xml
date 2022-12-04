@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Human Healthcare</string>
+    <string name="masuk">Masuk</string>
+    <string name="daftar">Daftar</string>
+    <string name="atau">atau</string>
+    <string name="sudah_punya_akun">Sudah Punya Akun?</string>
+    <string name="masukan_umur">Masukan Umur</string>
+    <string name="masukan_tinggi">Masukan Tinggi Badan</string>
+    <string name="masukan_berat_badan">Masukan Berat Badan</string>
+    <string name="masukan_username">Masukan Username</string>
+    <string name="masukan_password">Masukan Password</string>
+    <string name="masukan_email">Masukan Email</string>
+    <string name="masukan_nama">Masukan Nama Lengkap</string>
+    <string name="masukan_jenis_kelamin">Masukan Jenis Kelamin</string>
+    <string name="belum_punya_akun">Belum Punya Akun?</string>
+    <string name="lanjutkan">Lanjutkan</string>
+    <string-array name="jenis_kelamin">
+        <item>Laki-laki</item>
+        <item>Perempuan</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
