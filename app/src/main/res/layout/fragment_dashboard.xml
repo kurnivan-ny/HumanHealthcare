@@ -120,6 +120,7 @@
                             android:layout_height="wrap_content"/>
 
                         <TextView
+                            android:id="@+id/output_karbohidrat"
                             android:text="10g"
                             android:textColor="@color/batas_normal"
                             android:fontFamily="@font/nunito_medium"
@@ -171,6 +172,7 @@
                             android:layout_gravity="center_horizontal|center_vertical|start"/>
 
                         <TextView
+                            android:id="@+id/output_lemak"
                             android:text="10g"
                             android:textColor="@color/lewat_batas_normal"
                             android:textStyle="bold"
@@ -241,6 +243,7 @@
                             android:layout_gravity="center_horizontal|center_vertical|start"/>
 
                         <TextView
+                            android:id="@+id/output_protein"
                             android:text="10g"
                             android:textColor="@color/batas_normal"
                             android:textStyle="bold"
@@ -288,7 +291,7 @@
                 android:paddingBottom="8dp"
                 android:paddingEnd="8dp"
                 android:drawableEnd="@drawable/ic_add_circle"
-                android:text="Makan Pagi / Sarapan"
+                android:text="Makan Pagi"
                 android:textAllCaps="false"
                 android:textColor="@color/black"
                 android:textSize="20sp"

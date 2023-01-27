@@ -220,17 +220,17 @@
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/edt_jenis_kelamin"
                 android:layout_width="match_parent"
-                android:background="@android:color/transparent"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:fontFamily="@font/nunito_semibold"
                 android:gravity="start|center"
                 android:inputType="none"
-                android:fontFamily="@font/nunito_semibold"
                 android:paddingStart="20dp"
-                android:text="@string/masukan_jenis_kelamin"
                 android:paddingEnd="20dp"
+                android:text="@string/masukan_jenis_kelamin"
                 android:textColor="@color/customColorHint"
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

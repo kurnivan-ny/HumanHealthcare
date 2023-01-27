@@ -5,9 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.navigation.findNavController
 import com.google.firebase.database.*
+import com.google.firebase.firestore.FirebaseFirestore
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentPengaturanAkunBinding
 import com.kurnivan_ny.humanhealthcare.sign.signin.User
 import com.kurnivan_ny.humanhealthcare.utils.Preferences
@@ -24,7 +24,8 @@ class PengaturanAkunFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var preferences: Preferences
-    lateinit var mDatabase: DatabaseReference
+//    lateinit var mDatabase: DatabaseReference
+    lateinit var db: FirebaseFirestore
 
     private lateinit var sEmail: String
     private lateinit var sUsername: String
@@ -50,7 +51,8 @@ class PengaturanAkunFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         preferences = Preferences(requireContext())
-        mDatabase = FirebaseDatabase.getInstance().getReference("User")
+
+        db = FirebaseFirestore.getInstance()
 
         setUpForm()
 
@@ -58,8 +60,8 @@ class PengaturanAkunFragment : Fragment() {
     }
 
     private fun setUpForm() {
-        binding.edtEmail.setText(preferences.getValues("email"))
-        binding.edtUsername.setText(preferences.getValues("username"))
+        binding.edtEmail.setText(preferences.getValuesString("email"))
+        binding.edtUsername.setText(preferences.getValuesString("username"))
     }
 
     private fun itemOnClickListener() {
@@ -112,45 +114,34 @@ class PengaturanAkunFragment : Fragment() {
         user.password = sPasswordBaru
 
         if (sPasswordBaru.equals(sKonfirmasiPassBaru)){
-            checkingPasswordLama(sUsername, sPasswordLama, sPasswordBaru, user)
+            checkingPasswordLama( sPasswordLama, user)
         }
 //        else {
 //            Toast.makeText(activity, "Password Baru Tidak Sama Dengan Konfirmasi Password", Toast.LENGTH_LONG).show()
 //        }
     }
 
-    private fun checkingPasswordLama(sUsername: String, sPasswordLama: String,
-                                     sPasswordBaru: String, data: User) {
+    private fun checkingPasswordLama( sPasswordLama: String, data: User) {
 
-            if (sPasswordLama.equals(preferences.getValues("password"))) {
-                savetoFirebase(data)
+            if (sPasswordLama.equals(preferences.getValuesString("password"))) {
+                savetoFirestore(data)
             }
 //            else {
 //                Toast.makeText(activity, "Password Lama Anda Salah", Toast.LENGTH_LONG).show()
 //            }
         }
 
-    private fun savetoFirebase(data: User) {
+    private fun savetoFirestore(data: User) {
 
-        mDatabase.child(data.username!!).addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(datasnapshot: DataSnapshot) {
-
-                mDatabase.child(data.username!!).setValue(data)
-
-                preferences.setValues("email", data.nama.toString())
-                preferences.setValues("username", data.jenis_kelamin.toString())
-                preferences.setValues("password", data.umur.toString())
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(activity, error.message, Toast.LENGTH_LONG).show()
-            }
-
-        })
-
-        preferences.setValues("email", data.email.toString())
-        preferences.setValues("username", data.username.toString())
-        preferences.setValues("password", data.password.toString())
+    db.collection("users").document(data.username!!)
+        .update(
+            "email", data.email.toString(),
+            "username", data.username.toString(),
+            "password", data.password.toString()
+        )
+        preferences.setValuesString("email", data.email.toString())
+        preferences.setValuesString("username", data.username.toString())
+        preferences.setValuesString("password", data.password.toString())
     }
 
     private fun edtForm() {

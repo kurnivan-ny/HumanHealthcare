@@ -4,9 +4,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.google.firebase.database.*
+import com.google.firebase.firestore.FirebaseFirestore
 import com.kurnivan_ny.humanhealthcare.HomeActivity
-import com.kurnivan_ny.humanhealthcare.R
 import com.kurnivan_ny.humanhealthcare.databinding.ActivityMasukBinding
 import com.kurnivan_ny.humanhealthcare.sign.signup.DaftarActivity
 import com.kurnivan_ny.humanhealthcare.utils.Preferences
@@ -18,7 +17,7 @@ class MasukActivity : AppCompatActivity() {
     private lateinit var iUsername:String
     private lateinit var iPassword:String
 
-    private lateinit var mDatabase: DatabaseReference
+    private lateinit var db: FirebaseFirestore
     private lateinit var preferences: Preferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,17 +25,17 @@ class MasukActivity : AppCompatActivity() {
         binding = ActivityMasukBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        mDatabase = FirebaseDatabase.getInstance().getReference("User")
+        db = FirebaseFirestore.getInstance()
         preferences = Preferences(this)
 
-        preferences.setValues("onboarding", "1")
+        preferences.setValuesString("onboarding", "1")
 
         binding.btnDaftar.setOnClickListener {
             var intent = Intent(this@MasukActivity, DaftarActivity::class.java)
             startActivity(intent)
         }
 
-        if(preferences.getValues("status").equals("1")){
+        if(preferences.getValuesString("status").equals("1")){
             finishAffinity()
 
             var goHome = Intent(this@MasukActivity, HomeActivity::class.java)
@@ -60,28 +59,26 @@ class MasukActivity : AppCompatActivity() {
     }
 
     private fun pushLogin(iUsername: String, iPassword: String) {
-        mDatabase.child(iUsername).addValueEventListener(object: ValueEventListener{
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@MasukActivity, error.message, Toast.LENGTH_LONG).show()
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                var user = snapshot.getValue(User::class.java)
-                if (user == null){
+        db.collection("users").document(iUsername).get()
+            .addOnSuccessListener{ document ->
+                if (document.get("username") == null){
                     Toast.makeText(this@MasukActivity, "Username tidak ditemukan", Toast.LENGTH_LONG).show()
                 } else {
+                    if (document.get("password")!!.equals(iPassword)){
 
-                    if (user.password.equals(iPassword)){
-                        preferences.setValues("email", user.email.toString())
-                        preferences.setValues("username", user.username.toString())
-                        preferences.setValues("password", user.password.toString())
-                        preferences.setValues("url", user.url.toString())
-                        preferences.setValues("nama", user.nama.toString())
-                        preferences.setValues("jenis_kelamin", user.jenis_kelamin.toString())
-                        preferences.setValues("umur", user.umur.toString())
-                        preferences.setValues("tinggi", user.tinggi.toString())
-                        preferences.setValues("berat", user.berat.toString())
-                        preferences.setValues("status", "1")
+
+                        preferences.setValuesString("email", document.get("email").toString())
+                        preferences.setValuesString("username", document.get("username").toString())
+                        preferences.setValuesString("password", document.get("password").toString())
+                        preferences.setValuesString("url", document.get("url").toString())
+                        preferences.setValuesString("nama", document.get("nama").toString())
+                        preferences.setValuesString("jenis_kelamin", document.get("jenis_kelamin").toString())
+
+                        preferences.setValuesInt("umur", document.get("umur").toString().toInt())
+                        preferences.setValuesInt("tinggi", document.get("tinggi").toString().toInt())
+                        preferences.setValuesInt("berat", document.get("berat").toString().toInt())
+
+                        preferences.setValuesString("status", "1")
 
                         finishAffinity()
 
@@ -92,7 +89,6 @@ class MasukActivity : AppCompatActivity() {
                     }
                 }
             }
-        })
 
     }
 }

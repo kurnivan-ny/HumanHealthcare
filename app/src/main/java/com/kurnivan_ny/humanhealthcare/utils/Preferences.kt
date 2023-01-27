@@ -10,13 +10,33 @@ class Preferences (val context: Context) {
 
     var sharedPreferences = context.getSharedPreferences(USER_PREFF, 0)
 
-    fun setValues(key:String, values:String){
-        val editor:SharedPreferences.Editor = sharedPreferences.edit()
-        editor.putString(key,values)
-        editor.apply()
+    val editor:SharedPreferences.Editor = sharedPreferences.edit()
+
+    fun setValuesString(key:String, values: String?){
+        editor.putString(key,values).apply()
     }
 
-    fun getValues(key: String): String? {
-        return sharedPreferences.getString(key, "")
+    fun setValuesInt(key:String, values: Int){
+        editor.putInt(key,values).apply()
+    }
+
+    fun setValuesFloat(key:String, values: Float){
+        editor.putFloat(key,values).apply()
+    }
+
+    fun getValuesString(key: String): String? {
+        return sharedPreferences.getString(key, null)
+    }
+
+    fun getValuesInt(key: String): Int {
+        return sharedPreferences.getInt(key, 0)
+    }
+    fun getValuesFloat(key: String): Float {
+        return sharedPreferences.getFloat(key, 0.00F)
+    }
+
+    fun clear() {
+        editor.clear()
+            .apply()
     }
 }

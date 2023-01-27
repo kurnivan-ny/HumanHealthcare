@@ -1,28 +1,29 @@
 package com.kurnivan_ny.humanhealthcare
 
-import android.app.ProgressDialog
-import android.content.Context
-import android.icu.number.NumberRangeFormatter.with
-import android.net.Uri
+import ai.onnxruntime.OnnxTensor
+import ai.onnxruntime.OrtEnvironment
+import ai.onnxruntime.OrtSession
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
-import com.bumptech.glide.Glide.with
 import com.bumptech.glide.request.RequestOptions
-import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.firebase.database.*
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentEditProfileBinding
 import com.kurnivan_ny.humanhealthcare.sign.signin.User
 import com.kurnivan_ny.humanhealthcare.utils.Preferences
+import java.nio.FloatBuffer
 import java.util.*
+import android.net.Uri as Uri
 
 /**
  * A simple [Fragment] subclass.
@@ -36,22 +37,27 @@ class EditProfileFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var preferences: Preferences
-    lateinit var mDatabase: DatabaseReference
-    lateinit var mInstance: FirebaseDatabase
+    lateinit var db: FirebaseFirestore
+    lateinit var storage: FirebaseStorage
 
-    private lateinit var sUsername: String
+    private lateinit var sUsername:String
     private lateinit var sNama:String
     private lateinit var sJenisKelamin:String
+
     private lateinit var sUmur:String
     private lateinit var sTinggi:String
     private lateinit var sBerat:String
 
-    val REQUEST_IMAGE_CAPTURE = 1
-    var statusAdd:Boolean = false
-    lateinit var filePath: Uri
+    private lateinit var TotalEnergi:String
 
-    lateinit var storage: FirebaseStorage
-    lateinit var storageReference: StorageReference
+    val imagefile = UUID.randomUUID().toString()
+
+    //FILE
+//    private var getFile: File? = null
+//
+//    val REQUEST_IMAGE_CAPTURE = 1
+//    var statusAdd:Boolean = false
+    lateinit var filePath: Uri
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,22 +77,49 @@ class EditProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         preferences = Preferences(requireContext())
-        mDatabase = FirebaseDatabase.getInstance().getReference("User")
+
+        storage = FirebaseStorage.getInstance()
+
+        db = FirebaseFirestore.getInstance()
 
         setUpFrom()
 
-        //edtFotoProfile()
+        edtFotoProfile()
 
         itemOnClickListener()
     }
 
-//    private fun edtFotoProfile() {
-//        binding.tvAdd.setOnClickListener {
+    private fun edtFotoProfile() {
+        binding.ivProfile.setOnClickListener {
 //            ImagePicker.with(this)
 //                .cameraOnly()
 //                .start()
-//        }
-//    }
+        startGallery()
+        }
+    }
+
+    private fun startGallery() {
+        val intent = Intent()
+        intent.action = Intent.ACTION_PICK
+        intent.type = "image/*"
+        val chooser = Intent.createChooser(intent, "Pilih Gambar")
+        launcherIntentGallery.launch(chooser)
+    }
+
+    private val launcherIntentGallery = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ){ result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK){
+            val selectedImg: Uri = result.data?.data as Uri
+            filePath = selectedImg
+
+            Glide.with(this)
+                .load(filePath)
+                .apply(RequestOptions.circleCropTransform())
+                .into(binding.ivProfile)
+
+        }
+    }
 
     private fun itemOnClickListener() {
         binding.ivBack.setOnClickListener {
@@ -113,7 +146,12 @@ class EditProfileFragment : Fragment() {
                 binding.edtBeratBadan.error = "Silakan isi Berat Badan (kg)"
                 binding.edtBeratBadan.requestFocus()
             } else {
-                saveUser(sNama, sJenisKelamin, sUmur, sTinggi, sBerat)
+//                uploadImage()
+                if (::filePath.isInitialized) {
+                    addImagetoCloudStorage(filePath, imagefile, sUsername)
+                }
+                var TotalEnergi:Float = predictRegressi(sJenisKelamin, sUmur, sTinggi, sBerat)
+                saveUser(sNama, sJenisKelamin, sUmur, sTinggi, sBerat, sUsername, TotalEnergi)
                 val toProfileFragment =
                     EditProfileFragmentDirections.actionEditProfileFragmentToProfileFragment()
                 binding.root.findNavController().navigate(toProfileFragment)
@@ -125,6 +163,41 @@ class EditProfileFragment : Fragment() {
             binding.root.findNavController().navigate(toPengAkunFragment)
         }
     }
+
+
+    private fun addImagetoCloudStorage(filePath: Uri, imagefile:String, sUsername: String) {
+        storage.reference.child("image_profile/$imagefile")
+            .putFile(filePath)
+
+        db.collection("users").document(sUsername!!)
+            .update(
+                "url", imagefile,
+            )
+
+        preferences.setValuesString("url", imagefile)
+//                .addOnSuccessListener {
+//                    Toast.makeText(activity, "Uploaded", Toast.LENGTH_LONG).show()
+//                }
+//                .addOnFailureListener { e ->
+//                    Toast.makeText(activity, "Failed" + e.message, Toast.LENGTH_LONG).show()
+//                }
+    }
+//    private fun uploadImage() {
+//        if (filePath != null){
+//            val ref = storageReference.child("image_profile/" + imagefile)
+//            ref.putFile(filePath)
+//                .addOnSuccessListener {
+//                    Toast.makeText(activity, "Uploaded", Toast.LENGTH_LONG).show()
+//                }
+//                .addOnFailureListener { e ->
+//                    Toast.makeText(activity, "Failed" + e.message, Toast.LENGTH_LONG).show()
+//                }
+////                .addOnProgressListener { taskSnapshot ->
+////                    val progress = 100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount
+////
+////                }
+//        }
+//    }
 
 //    private fun saveUrl(user: User) {
 //        if (filePath != null){
@@ -152,42 +225,29 @@ class EditProfileFragment : Fragment() {
 //        }
 //    }
 
-//    private fun saveToFirebase(url: String, data: User) {
-//        mDatabase.child(data.username!!).addValueEventListener(object: ValueEventListener{
-//            override fun onDataChange(datasnapshot: DataSnapshot) {
-//                data.url = url
-//                mDatabase.child(data.username!!).setValue(data)
-//                preferences.setValues("url", url)
-//                preferences.setValues("nama", data.nama.toString())
-//                preferences.setValues("jenis_kelamin", data.jenis_kelamin.toString())
-//                preferences.setValues("umur", data.umur.toString())
-//                preferences.setValues("tinggi", data.tinggi.toString())
-//                preferences.setValues("berat", data.berat.toString())
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                Toast.makeText(activity, error.message, Toast.LENGTH_LONG).show()
-//            }
-//
-//        })
-//
-//    }
+    private fun setUpFrom() {
+        val jeniskelamin = resources.getStringArray(R.array.jenis_kelamin)
+        val arrayAdapterJenisKelamin = ArrayAdapter(requireContext(), R.layout.dropdown_item, jeniskelamin)
+        binding.edtJenisKelamin.setAdapter(arrayAdapterJenisKelamin)
 
-//    private fun saveToFirebase(data: User) {
-//
-//        sUsername = preferences.getValues("username").toString()
-//        mDatabase.child(sUsername).setValue(data)
-//
-//        preferences.setValues("nama", data.nama.toString())
-//        preferences.setValues("jenis_kelamin", data.jenis_kelamin.toString())
-//        preferences.setValues("umur", data.umur.toString())
-//        preferences.setValues("tinggi", data.tinggi.toString())
-//        preferences.setValues("berat", data.berat.toString())
-//    }
+        var sUrl = preferences.getValuesString("url").toString()
 
+        storage.reference.child("image_profile/$sUrl").downloadUrl.addOnSuccessListener { Uri ->
+            Glide.with(this)
+                .load(Uri)
+                .apply(RequestOptions.circleCropTransform())
+                .into(binding.ivProfile)
+        }
 
+        binding.edtNama.setText(preferences.getValuesString("nama"))
+        binding.edtUmur.setText(preferences.getValuesInt("umur").toString())
+        binding.edtTinggi.setText(preferences.getValuesInt("tinggi").toString())
+        binding.edtBeratBadan.setText(preferences.getValuesInt("berat").toString())
+    }
 
     private fun edtForm() {
+        sUsername = preferences.getValuesString("username").toString()
+
         sNama = binding.edtNama.text.toString()
         sJenisKelamin = binding.edtJenisKelamin.text.toString()
         sUmur = binding.edtUmur.text.toString()
@@ -198,62 +258,105 @@ class EditProfileFragment : Fragment() {
     private fun saveUser(
         sNama: String, sJenisKelamin: String,
         sUmur: String, sTinggi: String,
-        sBerat: String) {
+        sBerat: String,
+        sUsername: String, TotalEnergi:Float) {
 
         val user = User()
+
+        user.username = sUsername
+
         user.nama = sNama
         user.jenis_kelamin = sJenisKelamin
-        user.umur = sUmur
-        user.tinggi = sTinggi
-        user.berat = sBerat
+        user.umur = sUmur.toInt()
+        user.tinggi = sTinggi.toInt()
+        user.berat = sBerat.toInt()
 
-        user.email = preferences.getValues("email").toString()
-        user.username = preferences.getValues("username").toString()
-        user.password = preferences.getValues("password").toString()
-        user.url = preferences.getValues("url").toString()
 
-        saveToFirebase(user)
+        user.totalenergikal = TotalEnergi
+
+        saveToFirestore(user)
     }
 
-    private fun saveToFirebase(data: User) {
-        mDatabase.child(data.username!!).addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(datasnapshot: DataSnapshot) {
-                mDatabase.child(data.username!!).setValue(data)
+    private fun saveToFirestore(data: User) {
+        db.collection("users").document(data.username!!)
+            .update(
+                "nama", data.nama.toString(),
+                "jenis_kelamin", data.jenis_kelamin.toString(),
 
-                preferences.setValues("nama", data.nama.toString())
-                preferences.setValues("jenis_kelamin", data.jenis_kelamin.toString())
-                preferences.setValues("umur", data.umur.toString())
-                preferences.setValues("tinggi", data.tinggi.toString())
-                preferences.setValues("berat", data.berat.toString())
+                "umur", data.umur.toString().toInt(),
+                "tinggi", data.tinggi.toString().toInt(),
+                "berat", data.berat.toString().toInt(),
 
-            }
+                "totalenergikal", (data.totalenergikal.toString()+"F").toFloat()
+            )
+        preferences.setValuesString("nama", data.nama.toString())
+        preferences.setValuesString("jenis_kelamin", data.jenis_kelamin.toString())
 
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(activity, error.message, Toast.LENGTH_LONG).show()
-            }
+        preferences.setValuesInt("umur", data.umur.toString().toInt())
+        preferences.setValuesInt("tinggi", data.tinggi.toString().toInt())
+        preferences.setValuesInt("berat", data.berat.toString().toInt())
 
-        })
+        preferences.setValuesFloat("totalenergikal", (data.totalenergikal
+            .toString().replace(",",".") +"F").toFloat())
+
     }
 
-    private fun killActivity() {
-        activity?.finish()
+    private fun createORTSession(ortEnvironment: OrtEnvironment): OrtSession {
+
+        val modelBytes = resources.openRawResource(R.raw.sklearn_model).readBytes()
+        return ortEnvironment.createSession(modelBytes)
     }
 
-    private fun setUpFrom() {
-        val jeniskelamin = resources.getStringArray(R.array.jenis_kelamin)
-        val arrayAdapterJenisKelamin = ArrayAdapter(requireContext(), R.layout.dropdown_item, jeniskelamin)
-        binding.edtJenisKelamin.setAdapter(arrayAdapterJenisKelamin)
+    private fun runPrediction(
+        floatBufferInputs: FloatBuffer?,
+        ortSession: OrtSession,
+        ortEnvironment: OrtEnvironment?
+    ): Any {
+        val inputName = ortSession.inputNames?.iterator()?.next()
+        val inputTensor =
+            OnnxTensor.createTensor(ortEnvironment, floatBufferInputs, longArrayOf(1, 5))
+        val results = ortSession.run(mapOf(inputName to inputTensor))
+        val output = results[0].value as Array<FloatArray>
+        return output[0][0]
+    }
 
-        Glide.with(this)
-            .load(preferences.getValues("url"))
-            .apply(RequestOptions.circleCropTransform())
-            .into(binding.ivProfile)
+    private fun predictRegressi(sJenisKelamin: String, sUmur: String, sTinggi: String, sBerat: String): Float {
 
-        binding.edtNama.setText(preferences.getValues("nama"))
-        binding.edtJenisKelamin.setText(preferences.getValues("jenis_kelamin"))
-        binding.edtUmur.setText(preferences.getValues("umur"))
-        binding.edtTinggi.setText(preferences.getValues("tinggi"))
-        binding.edtBeratBadan.setText(preferences.getValues("berat"))
+        var TotalEnergi:Float = if (sJenisKelamin.equals("Laki-laki")){
+            val floatBufferInputs = FloatBuffer.wrap(
+                floatArrayOf(
+                    sUmur.toFloat(),
+                    sBerat.toFloat(),
+                    sTinggi.toFloat(),
+                    1.0f,
+                    0.0f
+                )
+            )
+            outputPrediction(floatBufferInputs)
+        } else {
+            val floatBufferInputs = FloatBuffer.wrap(
+                floatArrayOf(
+                    sUmur.toFloat(),
+                    sBerat.toFloat(),
+                    sTinggi.toFloat(),
+                    0.0f,
+                    1.0f
+                )
+            )
+            outputPrediction(floatBufferInputs)
+        }
+        return TotalEnergi
+    }
+
+    private fun outputPrediction(floatBufferInputs: FloatBuffer?): Float {
+        val ortEnvironment = OrtEnvironment.getEnvironment()
+        val ortSession = createORTSession(ortEnvironment)
+        val output = runPrediction(floatBufferInputs, ortSession, ortEnvironment)
+
+        var TotalEnergi:Float = (String.format("%.2f", output).replace(",",".") + "F").toFloat()
+
+        return TotalEnergi
+
     }
 
 }

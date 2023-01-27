@@ -15,7 +15,11 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.core.Constants
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentProfileBinding
+import com.kurnivan_ny.humanhealthcare.sign.signin.MasukActivity
 import com.kurnivan_ny.humanhealthcare.utils.Preferences
 
 /**
@@ -30,7 +34,8 @@ class ProfileFragment : Fragment(), View.OnClickListener {
     private val binding get() = _binding!!
 
     private lateinit var preferences: Preferences
-    lateinit var mDatabase: DatabaseReference
+    lateinit var storage: FirebaseStorage
+    lateinit var db: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,7 +55,9 @@ class ProfileFragment : Fragment(), View.OnClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         preferences = Preferences(requireContext())
-        mDatabase = FirebaseDatabase.getInstance().getReference("User")
+        db = FirebaseFirestore.getInstance()
+
+        storage = FirebaseStorage.getInstance()
 
         //SETUP
         itemOnClickListener()
@@ -60,18 +67,21 @@ class ProfileFragment : Fragment(), View.OnClickListener {
 
     private fun showDataUser() {
 
-        binding.tvNama.setText(preferences.getValues("nama").toString())
+        binding.tvNama.setText(preferences.getValuesString("nama").toString())
 
-        Glide.with(this)
-            .load(preferences.getValues("url"))
-            .apply(RequestOptions.circleCropTransform())
-            .into(binding.ivProfile)
+        var sUrl = preferences.getValuesString("url").toString()
+
+        storage.reference.child("image_profile/$sUrl").downloadUrl.addOnSuccessListener { Uri ->
+            Glide.with(this)
+                .load(Uri)
+                .apply(RequestOptions.circleCropTransform())
+                .into(binding.ivProfile)
+        }
     }
 
 
     private fun itemOnClickListener(){
         binding.btnEdtProfile.setOnClickListener(this)
-//        binding.btnPengAkun.setOnClickListener(this)
         binding.btnKeluar.setOnClickListener(this)
     }
 
@@ -83,13 +93,42 @@ class ProfileFragment : Fragment(), View.OnClickListener {
             }
             R.id.btn_keluar -> {
                 //logout, go to login activity
-                //alertLogout()
+                alertLogout()
             }
         }
+    }
+
+    private fun alertLogout() {
+        val view = View.inflate(requireContext(), R.layout.profile_logout_dialog, null)
+
+        AlertDialog.Builder(requireContext(), R.style.MyAlertDialogTheme)
+            .setTitle("Apakah Anda yakin ingin keluar?")
+            .setView(view)
+            .setNegativeButton("Tidak"){ p0, _ ->
+                p0.dismiss()
+            }
+            .setPositiveButton("Ya"){_, _ ->
+                progressBar(true)
+                observerLogout()
+            }.show()
+    }
+
+    private fun observerLogout() {
+        progressBar(false)
+        preferences.clear()
+        killActivity()
+        startActivity(Intent(requireContext(), MasukActivity::class.java))
     }
 
     private fun killActivity() {
         activity?.finish()
     }
 
+    private fun progressBar(isLoading: Boolean) = with(binding){
+        if (isLoading){
+            this.progressBar.visibility = View.VISIBLE
+        } else {
+            this.progressBar.visibility = View.GONE
+        }
+    }
 }

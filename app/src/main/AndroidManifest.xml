@@ -21,6 +21,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.MaterialComponents.noActionBar">
         <activity
+            android:name=".SearchMakananActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailMakananActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManualActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StatusActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeActivity"
             android:exported="false" />
         <activity

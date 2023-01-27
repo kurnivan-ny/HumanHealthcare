@@ -77,8 +77,8 @@ class OnBoardingActivity : AppCompatActivity() {
 
         preference = Preferences(this)
 
-        if (preference.getValues("onboarding").equals("1")){
-            preference.setValues("onboarding", "1")
+        if (preference.getValuesString("onboarding").equals("1")){
+            preference.setValuesString("onboarding", "1")
             finishAffinity()
 
             var intent = Intent(this@OnBoardingActivity, MasukActivity::class.java)
@@ -86,7 +86,7 @@ class OnBoardingActivity : AppCompatActivity() {
         }
 
         binding.btnMasuk.setOnClickListener {
-            preference.setValues("onboarding", "1")
+            preference.setValuesString("onboarding", "1")
             finishAffinity()
 
             var intent = Intent(this@OnBoardingActivity, MasukActivity::class.java)
@@ -94,7 +94,7 @@ class OnBoardingActivity : AppCompatActivity() {
         }
 
         binding.btnDaftar.setOnClickListener {
-            preference.setValues("onboarding", "1")
+            preference.setValuesString("onboarding", "1")
             finishAffinity()
 
             var intent = Intent(this@OnBoardingActivity, DaftarActivity::class.java)

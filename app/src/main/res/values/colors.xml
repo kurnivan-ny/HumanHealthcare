@@ -19,6 +19,7 @@
     <color name="stroke_status_batas">#53ACFF</color>
     <color name="batas_normal">#11BD41</color>
     <color name="lewat_batas_normal">#FF0000</color>
+    <color name="batas_bawah">#FFC700</color>
     <color name="top_bar">#2C95DC</color>
     <color name="trans">#00000000 </color>
 </resources>
