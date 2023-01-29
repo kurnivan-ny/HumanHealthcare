@@ -78,6 +78,9 @@ class MasukActivity : AppCompatActivity() {
                         preferences.setValuesInt("tinggi", document.get("tinggi").toString().toInt())
                         preferences.setValuesInt("berat", document.get("berat").toString().toInt())
 
+                        preferences.setValuesFloat("totalenergikal", (document.get("totalenergikal")
+                            .toString().replace(",",".") +"F").toFloat())
+
                         preferences.setValuesString("status", "1")
 
                         finishAffinity()

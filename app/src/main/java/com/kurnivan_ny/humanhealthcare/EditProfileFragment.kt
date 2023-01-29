@@ -228,7 +228,6 @@ class EditProfileFragment : Fragment() {
     private fun setUpFrom() {
         val jeniskelamin = resources.getStringArray(R.array.jenis_kelamin)
         val arrayAdapterJenisKelamin = ArrayAdapter(requireContext(), R.layout.dropdown_item, jeniskelamin)
-        binding.edtJenisKelamin.setAdapter(arrayAdapterJenisKelamin)
 
         var sUrl = preferences.getValuesString("url").toString()
 
@@ -240,6 +239,9 @@ class EditProfileFragment : Fragment() {
         }
 
         binding.edtNama.setText(preferences.getValuesString("nama"))
+        binding.edtJenisKelamin.setText(preferences.getValuesString("jenis_kelamin"))
+        binding.edtJenisKelamin.setAdapter(arrayAdapterJenisKelamin)
+
         binding.edtUmur.setText(preferences.getValuesInt("umur").toString())
         binding.edtTinggi.setText(preferences.getValuesInt("tinggi").toString())
         binding.edtBeratBadan.setText(preferences.getValuesInt("berat").toString())

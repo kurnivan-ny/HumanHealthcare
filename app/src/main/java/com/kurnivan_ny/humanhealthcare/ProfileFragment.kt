@@ -102,7 +102,6 @@ class ProfileFragment : Fragment(), View.OnClickListener {
         val view = View.inflate(requireContext(), R.layout.profile_logout_dialog, null)
 
         AlertDialog.Builder(requireContext(), R.style.MyAlertDialogTheme)
-            .setTitle("Apakah Anda yakin ingin keluar?")
             .setView(view)
             .setNegativeButton("Tidak"){ p0, _ ->
                 p0.dismiss()

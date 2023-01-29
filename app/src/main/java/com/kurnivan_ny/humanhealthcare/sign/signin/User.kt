@@ -18,7 +18,7 @@ class User {
 class Konsumsi {
     var tanggal_makan:String? = null
 
-    var total_konsumsi_kabohidrat:Float?= null
+    var total_konsumsi_karbohidrat:Float?= null
     var total_konsumsi_protein:Float?= null
     var total_konsumsi_lemak:Float?= null
 
@@ -29,4 +29,11 @@ class Konsumsi {
 
 class Makan {
     var waktu_makan:String? = null
+    var nama_makanan:String? = null
+    var satuan_makanan:String? = null
+    var berat_makanan:Int? = null
+
+    var karbohidrat:Float? = null
+    var protein:Float? = null
+    var lemak:Float? = null
 }

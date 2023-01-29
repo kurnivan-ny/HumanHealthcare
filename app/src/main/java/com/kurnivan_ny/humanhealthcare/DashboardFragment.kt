@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.firestore.FirebaseFirestore
@@ -39,7 +40,6 @@ class DashboardFragment : Fragment() {
 
     lateinit var calendar: Calendar
     lateinit var simpleDataFormat: SimpleDateFormat
-    lateinit var date: String
     private lateinit var STanggalMakan:String
 
     private lateinit var sUsername:String
@@ -72,7 +72,7 @@ class DashboardFragment : Fragment() {
         storage = FirebaseStorage.getInstance()
 
         sUsername = preferences.getValuesString("username").toString()
-        binding.tvNama.setText("Hallo, "+ sUsername)
+        binding.tvNama.text = "Hallo, "+ sUsername
 
         sUrl = preferences.getValuesString("url").toString()
         storage.reference.child("image_profile/$sUrl").downloadUrl.addOnSuccessListener { Uri ->
@@ -83,11 +83,14 @@ class DashboardFragment : Fragment() {
         }
 
         calendar = Calendar.getInstance()
+        simpleDataFormat = SimpleDateFormat("dd MMMM yyyy")
+        STanggalMakan = simpleDataFormat.format(calendar.time)
+
+        binding.dateEditText.setText(STanggalMakan)
+
         getCalendar()
 
-        val totalenergikal:Float = preferences.getValuesFloat("totalenergikal")
-
-        AMDR(totalenergikal, sUsername, STanggalMakan)
+        AMDR(sUsername, STanggalMakan)
 
         binding.btnBreakfast.setOnClickListener {
             preferences.setValuesString("waktu_makan", "Makan Pagi")
@@ -109,13 +112,9 @@ class DashboardFragment : Fragment() {
     }
 
     private fun getCalendar() {
-        calendar = Calendar.getInstance()
-        simpleDataFormat = SimpleDateFormat("dd-M-yyyy")
-        STanggalMakan = simpleDataFormat.format(calendar.time)
 
         binding.dateEditText.isFocusable = false
 
-        binding.dateEditText.setText(STanggalMakan)
 
         binding.dateEditText.setOnClickListener {
 
@@ -125,32 +124,34 @@ class DashboardFragment : Fragment() {
 
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
-                { view, year, monthOfYear, dayOfMonth ->
+                { _, year, monthOfYear, dayOfMonth ->
 
-
-                    STanggalMakan = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
+                    val arrayMonth = arrayOf("Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                        "Juli", "Agustus", "September", "Oktober", "November", "Desember")
+                    STanggalMakan = (dayOfMonth.toString() + " " + (arrayMonth[monthOfYear]) + " " + year)
                     binding.dateEditText.setText(STanggalMakan)
+
+                    val konsumsi = updatedataMakan(STanggalMakan)
+                    checkMakan(sUsername,konsumsi)
                 }, year, month, day
             )
             datePickerDialog.show()
-
-            updateMakan(sUsername, STanggalMakan)
         }
     }
 
-    private fun updateMakan(sUsername: String, sTanggalMakan: String) {
+    private fun updatedataMakan(sTanggalMakan: String): Konsumsi {
         val konsumsi = Konsumsi()
         konsumsi.tanggal_makan = sTanggalMakan
 
-        konsumsi.total_konsumsi_kabohidrat = 0.00F
+        konsumsi.total_konsumsi_karbohidrat = 0.00F
         konsumsi.total_konsumsi_protein = 0.00F
         konsumsi.total_konsumsi_lemak = 0.00F
 
-        konsumsi.status_konsumsi_karbohidrat = Status_konsumsi_karbohidrat
-        konsumsi.status_konsumsi_protein = Status_konsumsi_protein
-        konsumsi.status_konsumsi_lemak = Status_konsumsi_lemak
+        konsumsi.status_konsumsi_karbohidrat = "Kurang"
+        konsumsi.status_konsumsi_protein = "Kurang"
+        konsumsi.status_konsumsi_lemak = "Kurang"
 
-        checkMakan(sUsername, konsumsi)
+        return konsumsi
     }
 
     private fun checkMakan(sUsername: String, data: Konsumsi) {
@@ -185,7 +186,7 @@ class DashboardFragment : Fragment() {
 
         preferences.setValuesString("tanggal_makan", data.tanggal_makan.toString())
 
-        preferences.setValuesFloat("total_konsumsi_karbohidrat", (data.total_konsumsi_kabohidrat
+        preferences.setValuesFloat("total_konsumsi_karbohidrat", (data.total_konsumsi_karbohidrat
             .toString().replace(",",".")+"F").toFloat())
         preferences.setValuesFloat("total_konsumsi_protein", (data.total_konsumsi_protein
             .toString().replace(",",".")+"F").toFloat())
@@ -198,7 +199,8 @@ class DashboardFragment : Fragment() {
     }
 
 
-    private fun AMDR(totalenergikal: Float, sUsername: String, sTanggalMakan: String) {
+    private fun AMDR(sUsername: String, sTanggalMakan: String) {
+        val totalenergikal:Float = preferences.getValuesFloat("totalenergikal")
         karbohidrat(totalenergikal)
         protein(totalenergikal)
         lemak(totalenergikal)
@@ -218,82 +220,66 @@ class DashboardFragment : Fragment() {
 
     private fun karbohidrat(totalenergikal: Float) {
         // karbohidrat = energi/4 gram
-        var total_karbohidrat:Float= preferences.getValuesFloat("total_konsumsi_lemak")/4
-//        var total_karbohidrat =500
-        val total_karbohidrat_kal = total_karbohidrat
+        var total_karbohidrat:Float= preferences.getValuesFloat("total_konsumsi_karbohidrat")
 
-        val batas_bawah_karbohidrat = totalenergikal*0.55
-        val batas_atas_karbohidrat = totalenergikal*0.75
+        val batas_bawah_karbohidrat = totalenergikal/4 *0.55
+        val batas_atas_karbohidrat = totalenergikal/4 *0.75
 
-        if (total_karbohidrat_kal < batas_bawah_karbohidrat) {
-            binding.outputKarbohidrat.text = "${total_karbohidrat_kal} gr"
+        if (total_karbohidrat < batas_bawah_karbohidrat) {
+            binding.outputKarbohidrat.text = "${String.format("%.2f",total_karbohidrat)} gr"
             binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
-            binding.outputKarbohidrat.setTextColor(Color.YELLOW)
             Status_konsumsi_karbohidrat = "Kurang"
-        } else if  ((total_karbohidrat_kal > batas_bawah_karbohidrat)&&(total_karbohidrat_kal < batas_atas_karbohidrat)){
-            binding.outputKarbohidrat.text = "${total_karbohidrat_kal} gr"
+        } else if  ((total_karbohidrat > batas_bawah_karbohidrat)&&(total_karbohidrat < batas_atas_karbohidrat)){
+            binding.outputKarbohidrat.text = "${String.format("%.2f",total_karbohidrat)} gr"
             binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
-            binding.outputKarbohidrat.setTextColor(Color.GREEN)
             Status_konsumsi_karbohidrat = "Normal"
-        } else if (total_karbohidrat_kal > batas_atas_karbohidrat) {
-            binding.outputKarbohidrat.text = "${total_karbohidrat_kal} gr"
+        } else if (total_karbohidrat > batas_atas_karbohidrat) {
+            binding.outputKarbohidrat.text = "${String.format("%.2f",total_karbohidrat)} gr"
             binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
-            binding.outputKarbohidrat.setTextColor(Color.RED)
             Status_konsumsi_karbohidrat = "Lebih"
         }
     }
 
     private fun protein(totalenergikal: Float) {
         // protein = energi/4 gram
-        val total_protein:Float = preferences.getValuesFloat("total_konsumsi_lemak")/4
-//        val total_protein =500
-        val total_protein_kal = total_protein
+        val total_protein:Float = preferences.getValuesFloat("total_konsumsi_protein")
 
-        val batas_bawah_protein = totalenergikal*0.07
-        val batas_atas_protein = totalenergikal*0.2
+        val batas_bawah_protein = totalenergikal/4 *0.07
+        val batas_atas_protein = totalenergikal/4 *0.2
 
-        if (total_protein_kal < batas_bawah_protein){
-            binding.outputProtein.text = "${total_protein_kal} gr"
+        if (total_protein < batas_bawah_protein){
+            binding.outputProtein.text = "${String.format("%.2f",total_protein)} gr"
             binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
-            binding.outputProtein.setTextColor(Color.YELLOW)
             Status_konsumsi_protein = "Kurang"
-        } else if  ((total_protein_kal > batas_bawah_protein)&&(total_protein_kal < batas_atas_protein)){
-            binding.outputProtein.text = "${total_protein_kal} gr"
+        } else if  ((total_protein > batas_bawah_protein)&&(total_protein < batas_atas_protein)){
+            binding.outputProtein.text = "${String.format("%.2f",total_protein)} gr"
             binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
-            binding.outputProtein.setTextColor(Color.GREEN)
             Status_konsumsi_protein = "Normal"
-        } else if (total_protein_kal > batas_atas_protein) {
-            binding.outputProtein.text = "${total_protein_kal} gr"
+        } else if (total_protein > batas_atas_protein) {
+            binding.outputProtein.text = "${String.format("%.2f",total_protein)} gr"
             binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
-            binding.outputProtein.setTextColor(Color.RED)
             Status_konsumsi_protein = "Lebih"
         }
     }
 
     private fun lemak(totalenergikal: Float) {
         // lemak = energi/9 gram
-        val total_lemak:Float = preferences.getValuesFloat("total_konsumsi_lemak")/9
+        val total_lemak:Float = preferences.getValuesFloat("total_konsumsi_lemak")
 
-//        val total_lemak = 500
-        val total_lemak_kal = total_lemak
+        val batas_bawah_lemak = totalenergikal/9 *0.15
+        val batas_atas_lemak = totalenergikal/9 *0.25
 
-        val batas_bawah_lemak = totalenergikal*0.15
-        val batas_atas_lemak = totalenergikal*0.25
-
-        if (total_lemak_kal < batas_bawah_lemak){
-            binding.outputLemak.text = "${total_lemak_kal} gr"
+        if (total_lemak < batas_bawah_lemak){
+            binding.outputLemak.text = "${String.format("%.2f",total_lemak)} gr"
             binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
-            binding.outputLemak.setTextColor(Color.YELLOW)
             Status_konsumsi_lemak = "Kurang"
-        } else if  ((total_lemak_kal > batas_bawah_lemak)&&(total_lemak_kal < batas_atas_lemak)){
-            binding.outputLemak.text = "${total_lemak_kal} gr"
+        } else if  ((total_lemak > batas_bawah_lemak)&&(total_lemak < batas_atas_lemak)){
+            binding.outputLemak.text = "${String.format("%.2f",total_lemak)} gr"
             binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
-            binding.outputLemak.setTextColor(Color.GREEN)
             Status_konsumsi_lemak = "Normal"
-        } else if (total_lemak_kal > batas_atas_lemak) {
-            binding.outputLemak.text = "${total_lemak_kal} gr"
+        } else if (total_lemak > batas_atas_lemak) {
+            binding.outputLemak.text = "${String.format("%.2f",total_lemak)} gr"
             binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
-            binding.outputLemak.setTextColor(Color.RED)
             Status_konsumsi_lemak = "Lebih"
         }
     }
