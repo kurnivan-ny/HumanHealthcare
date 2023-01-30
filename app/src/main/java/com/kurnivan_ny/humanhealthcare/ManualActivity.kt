@@ -21,7 +21,7 @@ class ManualActivity : AppCompatActivity() {
 
         preferences = Preferences(this)
 
-        binding.tvWaktuMakan.text = preferences.getValuesString("waktu_makan")
+        binding.tvWaktuMakan.text = capitalize(preferences.getValuesString("waktu_makan"))
 
         binding.svMakanan.isFocusable = false
 
@@ -30,5 +30,10 @@ class ManualActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+    }
+
+    private fun capitalize(str: String?): CharSequence? {
+        return str?.trim()?.split("\\s+".toRegex())
+            ?.map { it.capitalize() }?.joinToString(" ")
     }
 }

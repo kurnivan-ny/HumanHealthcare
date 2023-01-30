@@ -48,7 +48,7 @@ class DaftarActivity : AppCompatActivity() {
         binding.btnMasuk.setOnClickListener {
             finishAffinity()
 
-            var intent = Intent(this@DaftarActivity, MasukActivity::class.java)
+            val intent = Intent(this@DaftarActivity, MasukActivity::class.java)
             startActivity(intent)
         }
 

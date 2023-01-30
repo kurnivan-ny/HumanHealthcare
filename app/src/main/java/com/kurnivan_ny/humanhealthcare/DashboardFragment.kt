@@ -2,24 +2,23 @@ package com.kurnivan_ny.humanhealthcare
 
 import android.app.DatePickerDialog
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentDashboardBinding
 import com.kurnivan_ny.humanhealthcare.sign.signin.Konsumsi
-import com.kurnivan_ny.humanhealthcare.sign.signin.Makan
+import com.kurnivan_ny.humanhealthcare.utils.DashboardViewModel
 import com.kurnivan_ny.humanhealthcare.utils.Preferences
-import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.time.measureTime
 
 
 /**
@@ -39,16 +38,13 @@ class DashboardFragment : Fragment() {
     lateinit var db: FirebaseFirestore
 
     lateinit var calendar: Calendar
-    lateinit var simpleDataFormat: SimpleDateFormat
-    private lateinit var STanggalMakan:String
+//    lateinit var simpleDataFormat: SimpleDateFormat
+    private lateinit var sTanggalMakan:String
 
     private lateinit var sUsername:String
     private lateinit var sUrl: String
 
-    private lateinit var Status_konsumsi_karbohidrat: String
-    private lateinit var Status_konsumsi_protein: String
-    private lateinit var Status_konsumsi_lemak: String
-
+    private lateinit var viewModel: DashboardViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,6 +52,7 @@ class DashboardFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
+
         return binding.root
     }
 
@@ -71,6 +68,9 @@ class DashboardFragment : Fragment() {
         db = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
 
+        calendar = Calendar.getInstance()
+        viewModel = ViewModelProvider(this).get(DashboardViewModel::class.java)
+
         sUsername = preferences.getValuesString("username").toString()
         binding.tvNama.text = "Hallo, "+ sUsername
 
@@ -82,27 +82,49 @@ class DashboardFragment : Fragment() {
                 .into(binding.ivProfile)
         }
 
-        calendar = Calendar.getInstance()
-        simpleDataFormat = SimpleDateFormat("dd MMMM yyyy")
-        STanggalMakan = simpleDataFormat.format(calendar.time)
+        if (binding.dateEditText.text.toString().equals("")){
+            binding.outputKarbohidrat.text = "0.00 gr"
+            binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
+            binding.outputProtein.text = "0.00 gr"
+            binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
+            binding.outputLemak.text = "0.00 gr"
+            binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
+        }
 
-        binding.dateEditText.setText(STanggalMakan)
+//        simpleDataFormat = SimpleDateFormat("dd MMMM yyyy")
+//        sTanggalMakan = simpleDataFormat.format(calendar.time)
+//
+//        binding.dateEditText.setText(sTanggalMakan)
 
-        getCalendar()
+        getTanggal()
 
-        AMDR(sUsername, STanggalMakan)
-
+        updateUI()
         binding.btnBreakfast.setOnClickListener {
-            preferences.setValuesString("waktu_makan", "Makan Pagi")
-            searchMakanan()
+            if (binding.dateEditText.text.toString().equals("")){
+                Toast.makeText(requireContext(), "Silakan Pilih Tanggal Makan", Toast.LENGTH_LONG).show()
+                binding.dateEditText.requestFocus()
+            } else {
+                preferences.setValuesString("waktu_makan", "makan pagi")
+                searchMakanan()
+            }
         }
         binding.btnLunch.setOnClickListener {
-            preferences.setValuesString("waktu_makan", "Makan Siang")
-            searchMakanan()
+            if (binding.dateEditText.text.toString().equals("")){
+                Toast.makeText(requireContext(), "Silakan Pilih Tanggal Makan", Toast.LENGTH_LONG).show()
+                binding.dateEditText.requestFocus()
+            } else {
+                preferences.setValuesString("waktu_makan", "makan siang")
+                searchMakanan()
+            }
         }
         binding.btnDinner.setOnClickListener {
-            preferences.setValuesString("waktu_makan", "Makan Malam")
-            searchMakanan()
+            if (binding.dateEditText.text.toString().equals("")){
+                Toast.makeText(requireContext(), "Silakan Pilih Tanggal Makan", Toast.LENGTH_LONG).show()
+                binding.dateEditText.requestFocus()
+            } else {
+                preferences.setValuesString("waktu_makan", "makan malam")
+                searchMakanan()
+            }
         }
     }
 
@@ -111,7 +133,7 @@ class DashboardFragment : Fragment() {
         startActivity(intent)
     }
 
-    private fun getCalendar() {
+    private fun getTanggal() {
 
         binding.dateEditText.isFocusable = false
 
@@ -124,22 +146,25 @@ class DashboardFragment : Fragment() {
 
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
-                { _, year, monthOfYear, dayOfMonth ->
+                { view, year, monthOfYear, dayOfMonth ->
 
                     val arrayMonth = arrayOf("Januari", "Februari", "Maret", "April", "Mei", "Juni",
                         "Juli", "Agustus", "September", "Oktober", "November", "Desember")
-                    STanggalMakan = (dayOfMonth.toString() + " " + (arrayMonth[monthOfYear]) + " " + year)
-                    binding.dateEditText.setText(STanggalMakan)
 
-                    val konsumsi = updatedataMakan(STanggalMakan)
+                    sTanggalMakan = (dayOfMonth.toString() + " " + (arrayMonth[monthOfYear]) + " " + year)
+
+                    viewModel.tanggal_makan.value = sTanggalMakan
+
+                    val konsumsi = updateKonsumsi(sTanggalMakan)
                     checkMakan(sUsername,konsumsi)
+
                 }, year, month, day
             )
             datePickerDialog.show()
         }
     }
 
-    private fun updatedataMakan(sTanggalMakan: String): Konsumsi {
+    private fun updateKonsumsi(sTanggalMakan: String): Konsumsi {
         val konsumsi = Konsumsi()
         konsumsi.tanggal_makan = sTanggalMakan
 
@@ -175,6 +200,13 @@ class DashboardFragment : Fragment() {
                     preferences.setValuesString("status_konsumsi_karbohidrat", document.get("status_konsumsi_karbohidrat").toString())
                     preferences.setValuesString("status_konsumsi_protein", document.get("status_konsumsi_protein").toString())
                     preferences.setValuesString("status_konsumsi_lemak", document.get("status_konsumsi_lemak").toString())
+
+                    viewModel.total_karbohidrat_konsumsi.value = (document.get("total_konsumsi_karbohidrat")
+                        .toString().replace(",",".")+"F").toFloat()
+                    viewModel.total_protein_konsumsi.value = (document.get("total_konsumsi_protein")
+                        .toString().replace(",",".")+"F").toFloat()
+                    viewModel.total_lemak_konsumsi.value = (document.get("total_konsumsi_lemak")
+                        .toString().replace(",",".")+"F").toFloat()
                 }
             }
     }
@@ -196,91 +228,140 @@ class DashboardFragment : Fragment() {
         preferences.setValuesString("status_konsumsi_karbohidrat", data.status_konsumsi_karbohidrat.toString())
         preferences.setValuesString("status_konsumsi_protein", data.status_konsumsi_protein.toString())
         preferences.setValuesString("status_konsumsi_lemak", data.status_konsumsi_lemak.toString())
+
+        viewModel.total_karbohidrat_konsumsi.value = (data.total_konsumsi_karbohidrat
+            .toString().replace(",",".")+"F").toFloat()
+        viewModel.total_protein_konsumsi.value = (data.total_konsumsi_protein
+            .toString().replace(",",".")+"F").toFloat()
+        viewModel.total_lemak_konsumsi.value = (data.total_konsumsi_lemak
+            .toString().replace(",",".")+"F").toFloat()
     }
 
 
-    private fun AMDR(sUsername: String, sTanggalMakan: String) {
+    private fun updateUI() {
         val totalenergikal:Float = preferences.getValuesFloat("totalenergikal")
+
+        viewModel.tanggal_makan.observe(viewLifecycleOwner, androidx.lifecycle.Observer{
+            binding.dateEditText.setText(it)
+        })
+
         karbohidrat(totalenergikal)
         protein(totalenergikal)
         lemak(totalenergikal)
-
-        db.collection("users").document(sUsername)
-            .collection("makan").document(sTanggalMakan)
-            .update(
-                "status_konsumsi_karbohidrat", Status_konsumsi_karbohidrat,
-                "status_konsumsi_protein", Status_konsumsi_protein,
-                "status_konsumsi_lemak", Status_konsumsi_lemak
-            )
-
-        preferences.setValuesString("status_konsumsi_karbohidrat", Status_konsumsi_karbohidrat)
-        preferences.setValuesString("status_konsumsi_protein", Status_konsumsi_protein)
-        preferences.setValuesString("status_konsumsi_lemak", Status_konsumsi_lemak)
     }
 
     private fun karbohidrat(totalenergikal: Float) {
         // karbohidrat = energi/4 gram
-        var total_karbohidrat:Float= preferences.getValuesFloat("total_konsumsi_karbohidrat")
-
         val batas_bawah_karbohidrat = totalenergikal/4 *0.55
         val batas_atas_karbohidrat = totalenergikal/4 *0.75
 
-        if (total_karbohidrat < batas_bawah_karbohidrat) {
-            binding.outputKarbohidrat.text = "${String.format("%.2f",total_karbohidrat)} gr"
-            binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
-            Status_konsumsi_karbohidrat = "Kurang"
-        } else if  ((total_karbohidrat > batas_bawah_karbohidrat)&&(total_karbohidrat < batas_atas_karbohidrat)){
-            binding.outputKarbohidrat.text = "${String.format("%.2f",total_karbohidrat)} gr"
-            binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
-            Status_konsumsi_karbohidrat = "Normal"
-        } else if (total_karbohidrat > batas_atas_karbohidrat) {
-            binding.outputKarbohidrat.text = "${String.format("%.2f",total_karbohidrat)} gr"
-            binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
-            Status_konsumsi_karbohidrat = "Lebih"
-        }
+        var status_konsumsi_karbohidrat: String
+
+        viewModel.total_karbohidrat_konsumsi.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            if (it < batas_bawah_karbohidrat) {
+                binding.outputKarbohidrat.setText("${String.format("%.2f",it)} gr")
+                binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
+                status_konsumsi_karbohidrat = "Kurang"
+                updateKarbohidrattoFirestore(status_konsumsi_karbohidrat)
+            } else if  ((it > batas_bawah_karbohidrat)&&(it < batas_atas_karbohidrat)){
+                binding.outputKarbohidrat.setText("${String.format("%.2f",it)} gr")
+                binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
+                status_konsumsi_karbohidrat = "Normal"
+                updateKarbohidrattoFirestore(status_konsumsi_karbohidrat)
+            } else if (it > batas_atas_karbohidrat) {
+                binding.outputKarbohidrat.setText("${String.format("%.2f",it)} gr")
+                binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
+                status_konsumsi_karbohidrat = "Lebih"
+                updateKarbohidrattoFirestore(status_konsumsi_karbohidrat)
+            }
+        })
     }
+
+    private fun updateKarbohidrattoFirestore(status_konsumsi_karbohidrat: String) {
+        db.collection("users").document(sUsername)
+            .collection("makan").document(preferences.getValuesString("tanggal_makan")!!)
+            .update(
+                "status_konsumsi_karbohidrat", status_konsumsi_karbohidrat,
+            )
+
+        preferences.setValuesString("status_konsumsi_karbohidrat", status_konsumsi_karbohidrat)
+    }
+
 
     private fun protein(totalenergikal: Float) {
         // protein = energi/4 gram
-        val total_protein:Float = preferences.getValuesFloat("total_konsumsi_protein")
 
         val batas_bawah_protein = totalenergikal/4 *0.07
         val batas_atas_protein = totalenergikal/4 *0.2
 
-        if (total_protein < batas_bawah_protein){
-            binding.outputProtein.text = "${String.format("%.2f",total_protein)} gr"
-            binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
-            Status_konsumsi_protein = "Kurang"
-        } else if  ((total_protein > batas_bawah_protein)&&(total_protein < batas_atas_protein)){
-            binding.outputProtein.text = "${String.format("%.2f",total_protein)} gr"
-            binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
-            Status_konsumsi_protein = "Normal"
-        } else if (total_protein > batas_atas_protein) {
-            binding.outputProtein.text = "${String.format("%.2f",total_protein)} gr"
-            binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
-            Status_konsumsi_protein = "Lebih"
-        }
+        var status_konsumsi_protein: String
+
+        viewModel.total_protein_konsumsi.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            if (it < batas_bawah_protein){
+                binding.outputProtein.setText("${String.format("%.2f",it)} gr")
+                binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
+                status_konsumsi_protein = "Kurang"
+                updateProteintoFirestore(status_konsumsi_protein)
+            } else if  ((it > batas_bawah_protein)&&(it < batas_atas_protein)){
+                binding.outputProtein.setText("${String.format("%.2f",it)} gr")
+                binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
+                status_konsumsi_protein = "Normal"
+                updateProteintoFirestore(status_konsumsi_protein)
+            } else if (it > batas_atas_protein) {
+                binding.outputProtein.setText("${String.format("%.2f",it)} gr")
+                binding.outputProtein.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
+                status_konsumsi_protein = "Lebih"
+                updateProteintoFirestore(status_konsumsi_protein)
+            }
+        })
+    }
+
+    private fun updateProteintoFirestore(status_konsumsi_protein: String) {
+        db.collection("users").document(sUsername)
+            .collection("makan").document(preferences.getValuesString("tanggal_makan")!!)
+            .update(
+                "status_konsumsi_protein", status_konsumsi_protein
+            )
+
+        preferences.setValuesString("status_konsumsi_protein", status_konsumsi_protein)
     }
 
     private fun lemak(totalenergikal: Float) {
         // lemak = energi/9 gram
-        val total_lemak:Float = preferences.getValuesFloat("total_konsumsi_lemak")
 
         val batas_bawah_lemak = totalenergikal/9 *0.15
         val batas_atas_lemak = totalenergikal/9 *0.25
 
-        if (total_lemak < batas_bawah_lemak){
-            binding.outputLemak.text = "${String.format("%.2f",total_lemak)} gr"
-            binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
-            Status_konsumsi_lemak = "Kurang"
-        } else if  ((total_lemak > batas_bawah_lemak)&&(total_lemak < batas_atas_lemak)){
-            binding.outputLemak.text = "${String.format("%.2f",total_lemak)} gr"
-            binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
-            Status_konsumsi_lemak = "Normal"
-        } else if (total_lemak > batas_atas_lemak) {
-            binding.outputLemak.text = "${String.format("%.2f",total_lemak)} gr"
-            binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
-            Status_konsumsi_lemak = "Lebih"
-        }
+        var status_konsumsi_lemak: String
+
+        viewModel.total_lemak_konsumsi.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            if (it < batas_bawah_lemak){
+                binding.outputLemak.setText("${String.format("%.2f",it)} gr")
+                binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_batas_kurang, 0, 0, 0)
+                status_konsumsi_lemak = "Kurang"
+                updateLemaktoFirestore(status_konsumsi_lemak)
+            } else if  ((it > batas_bawah_lemak)&&(it < batas_atas_lemak)){
+                binding.outputLemak.setText("${String.format("%.2f",it)} gr")
+                binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.batas_normal, 0, 0, 0)
+                status_konsumsi_lemak = "Normal"
+                updateLemaktoFirestore(status_konsumsi_lemak)
+            } else if (it > batas_atas_lemak) {
+                binding.outputLemak.setText("${String.format("%.2f",it)} gr")
+                binding.outputLemak.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
+                status_konsumsi_lemak = "Lebih"
+                updateLemaktoFirestore(status_konsumsi_lemak)
+            }
+        })
+    }
+
+    private fun updateLemaktoFirestore(status_konsumsi_lemak: String) {
+        db.collection("users").document(sUsername)
+            .collection("makan").document(preferences.getValuesString("tanggal_makan")!!)
+            .update(
+                "status_konsumsi_lemak", status_konsumsi_lemak
+            )
+
+        preferences.setValuesString("status_konsumsi_lemak", status_konsumsi_lemak)
+
     }
 }

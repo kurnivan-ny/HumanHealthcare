@@ -52,6 +52,7 @@
                 android:layout_marginEnd="24dp"
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp"
+                app:hintEnabled="false"
                 android:background="@drawable/ic_searchbox_tanggal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -65,7 +66,8 @@
                     android:fontFamily="@font/roboto_medium"
                     android:paddingTop="5dp"
                     android:gravity="center"
-                    android:text="Select Date"
+                    android:hint="Pilih Tanggal"
+                    android:textColorHint="@color/customColorHint"
                     android:inputType="date|text"
                     android:textColor="@color/black"
                     android:textSize="20sp" />
