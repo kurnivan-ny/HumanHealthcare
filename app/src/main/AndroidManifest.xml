@@ -21,31 +21,31 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.MaterialComponents.noActionBar">
         <activity
-            android:name=".SearchMakananActivity"
+            android:name=".ui.main.manualinput.SearchMakananActivity"
             android:exported="false" />
         <activity
-            android:name=".DetailMakananActivity"
+            android:name=".ui.main.manualinput.DetailMakananActivity"
             android:exported="false" />
         <activity
-            android:name=".ManualActivity"
+            android:name=".ui.main.manualinput.ManualActivity"
             android:exported="false" />
         <activity
-            android:name=".StatusActivity"
+            android:name=".ui.main.StatusActivity"
             android:exported="false" />
         <activity
-            android:name=".HomeActivity"
+            android:name=".ui.main.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".viewPager.OnBoardingActivity"
+            android:name=".ui.onboarding.OnBoardingActivity"
             android:exported="false" />
         <activity
-            android:name=".sign.signin.MasukActivity"
+            android:name=".ui.sign.MasukActivity"
             android:exported="false" />
         <activity
-            android:name=".sign.signup.DaftarActivity"
+            android:name=".ui.sign.DaftarActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashScreenActivity"
+            android:name=".ui.splashscreen.SplashScreenActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

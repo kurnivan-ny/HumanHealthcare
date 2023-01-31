@@ -7,17 +7,17 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.kurnivan_ny.humanhealthcare.DashboardFragment"
+        android:name="com.kurnivan_ny.humanhealthcare.ui.main.fragment.dashboard.DashboardFragment"
         android:label="fragment_dashboard"
         tools:layout="@layout/fragment_dashboard" />
     <fragment
         android:id="@+id/historyFragment"
-        android:name="com.kurnivan_ny.humanhealthcare.HistoryFragment"
+        android:name="com.kurnivan_ny.humanhealthcare.ui.main.fragment.history.HistoryFragment"
         android:label="fragment_history"
         tools:layout="@layout/fragment_history" />
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.kurnivan_ny.humanhealthcare.ProfileFragment"
+        android:name="com.kurnivan_ny.humanhealthcare.ui.main.fragment.profile.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" >
         <action
@@ -26,7 +26,7 @@
     </fragment>
     <fragment
         android:id="@+id/editProfileFragment"
-        android:name="com.kurnivan_ny.humanhealthcare.EditProfileFragment"
+        android:name="com.kurnivan_ny.humanhealthcare.ui.main.fragment.profile.EditProfileFragment"
         android:label="fragment_edit_profile"
         tools:layout="@layout/fragment_edit_profile" >
         <action
@@ -38,7 +38,7 @@
     </fragment>
     <fragment
         android:id="@+id/pengaturan_akun_fragment"
-        android:name="com.kurnivan_ny.humanhealthcare.PengaturanAkunFragment"
+        android:name="com.kurnivan_ny.humanhealthcare.ui.main.fragment.profile.PengaturanAkunFragment"
         android:label="fragment_pengaturan_akun"
         tools:layout="@layout/fragment_pengaturan_akun">
         <action

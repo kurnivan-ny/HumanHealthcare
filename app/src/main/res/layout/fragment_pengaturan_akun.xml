@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/pengaturan_akun_fragment"
-    tools:context=".PengaturanAkunFragment">
+    tools:context=".ui.main.fragment.profile.PengaturanAkunFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"

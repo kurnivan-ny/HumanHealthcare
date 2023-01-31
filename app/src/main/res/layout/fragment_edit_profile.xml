@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/edit_profile_fragment"
-    tools:context=".EditProfileFragment">
+    tools:context=".ui.main.fragment.profile.EditProfileFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
