@@ -87,6 +87,7 @@ class ProfileFragment : Fragment(), View.OnClickListener {
                 binding.root.findNavController().navigate(toEditProfileFragment)
             }
             R.id.btn_keluar -> {
+
                 //logout, go to login activity
                 alertLogout()
             }
@@ -98,6 +99,7 @@ class ProfileFragment : Fragment(), View.OnClickListener {
 
         AlertDialog.Builder(requireContext(), R.style.MyAlertDialogTheme)
             .setView(view)
+            .setCancelable(false)
             .setNegativeButton("Tidak"){ p0, _ ->
                 p0.dismiss()
             }

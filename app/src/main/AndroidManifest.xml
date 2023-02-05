@@ -21,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.MaterialComponents.noActionBar">
         <activity
+            android:name=".ui.main.manualinput.EditDetailMakananActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.main.manualinput.SearchMakananActivity"
             android:exported="false" />
         <activity

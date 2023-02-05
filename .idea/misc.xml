@@ -14,11 +14,14 @@
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_batas_status.xml" value="0.2665" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_breakfast.xml" value="0.2665" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_btn_blue_white.xml" value="0.235" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_cancel.xml" value="0.1" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_check.xml" value="0.1" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_daftar.xml" value="0.3635" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_done.xml" value="0.2465" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_edt_profile.xml" value="0.1995" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_footer.xml" value="0.3635" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_kelaur.xml" value="0.1995" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_keluar.xml" value="0.1" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_launcher_background.xml" value="0.3635" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_line.xml" value="0.3635" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/drawable/ic_line_atau.xml" value="0.3635" />
@@ -37,24 +40,28 @@
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_daftar_2.xml" value="0.3625" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_dashboard.xml" value="0.3625" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_detail_makanan.xml" value="0.176" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_edit_detail_makanan.xml" value="0.12158054711246201" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_edit_profile.xml" value="0.3625" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_home.xml" value="0.25" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_home_two.xml" value="0.35688405797101447" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_main.xml" value="0.3625" />
-        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_manual.xml" value="0.4" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_manual.xml" value="0.16799999999999998" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_masuk.xml" value="0.33" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_on_boarding.xml" value="0.3625" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_search_makanan.xml" value="0.264" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_splash_screen.xml" value="0.3625" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/activity_status.xml" value="0.35833333333333334" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/alert_over.xml" value="0.2" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/dropdown_item.xml" value="0.3614583333333333" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/fragment_dashboard.xml" value="0.2" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/fragment_edit_profile.xml" value="0.264" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/fragment_history.xml" value="0.25" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/fragment_pengaturan_akun.xml" value="0.33" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/fragment_profile.xml" value="0.16" />
-        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/item_slide.xml" value="0.25" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/item_slide.xml" value="0.1" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/kosong.xml" value="0.18541666666666667" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/list_item_manual.xml" value="0.1838768115942029" />
+        <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/loading_dialog.xml" value="0.1" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/profile_logout_dialog.xml" value="0.3614583333333333" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/search_item_.xml" value="0.24896265560165975" />
         <entry key="..\:/project android/HumanHealthcare/app/src/main/res/layout/slider_item.xml" value="0.3614583333333333" />

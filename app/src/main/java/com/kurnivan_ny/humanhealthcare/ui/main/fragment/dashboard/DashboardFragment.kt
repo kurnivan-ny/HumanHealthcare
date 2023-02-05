@@ -1,11 +1,15 @@
 package com.kurnivan_ny.humanhealthcare.ui.main.fragment.dashboard
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -17,6 +21,7 @@ import com.kurnivan_ny.humanhealthcare.ui.main.manualinput.ManualActivity
 import com.kurnivan_ny.humanhealthcare.R
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentDashboardBinding
 import com.kurnivan_ny.humanhealthcare.data.pushFirestore.Konsumsi
+import com.kurnivan_ny.humanhealthcare.ui.dialog.LoadingDialog
 import com.kurnivan_ny.humanhealthcare.viewmodel.DashboardViewModel
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 import java.util.*
@@ -154,6 +159,8 @@ class DashboardFragment : Fragment() {
 
                     sTanggalMakan = (dayOfMonth.toString() + " " + (arrayMonth[monthOfYear]) + " " + year)
 
+                    loadingDialog()
+
                     viewModel.tanggal_makan.value = sTanggalMakan
 
                     val konsumsi = updateKonsumsi(sTanggalMakan)
@@ -164,6 +171,19 @@ class DashboardFragment : Fragment() {
             datePickerDialog.show()
         }
     }
+
+    private fun loadingDialog() {
+        val loading = LoadingDialog(requireActivity())
+        loading.startLoading()
+        val handler = Handler()
+        handler.postDelayed(object: Runnable{
+            override fun run() {
+                loading.isDismiss()
+            }
+        }, 2000)
+
+    }
+
 
     private fun updateKonsumsi(sTanggalMakan: String): Konsumsi {
         val konsumsi = Konsumsi()
@@ -274,8 +294,25 @@ class DashboardFragment : Fragment() {
                 binding.outputKarbohidrat.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lewat_batas_normal, 0, 0, 0)
                 status_konsumsi_karbohidrat = "Lebih"
                 updateKarbohidrattoFirestore(status_konsumsi_karbohidrat)
+                alertLebihKarbohidrat()
             }
         })
+    }
+
+    private fun alertLebihKarbohidrat() {
+        val view = View.inflate(requireContext(), R.layout.over_dialog, null)
+        val tv_title = view.findViewById<TextView>(R.id.tv_title)
+        val img_over = view.findViewById<ImageView>(R.id.iv_over)
+        val tv_message = view.findViewById<TextView>(R.id.tv_message)
+
+        tv_title.setText("Anda Kelebihan Karbohidrat")
+        img_over.setImageResource(R.drawable.pantau_kolesterol)
+        tv_message.setText("Penyakit yang mungkin")
+
+        AlertDialog.Builder(requireContext(), R.style.MyAlertDialogTheme)
+            .setView(view)
+            .show()
+
     }
 
     private fun updateKarbohidrattoFirestore(status_konsumsi_karbohidrat: String) {

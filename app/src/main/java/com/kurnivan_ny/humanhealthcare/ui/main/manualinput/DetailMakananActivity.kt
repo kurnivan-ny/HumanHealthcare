@@ -83,8 +83,10 @@ class DetailMakananActivity : AppCompatActivity() {
                 var berat_makanan = binding.edtBeratMakanan.text.toString()
 
                 if (berat_makanan.equals("") or berat_makanan.equals("0")){
-                    var beratMakanan = 0
-                    hitungKebutuhan(beratMakanan, karbohidrat, protein, lemak)
+
+                    binding.tvKarbohidrat.text = "Karbohidrat:\t 0.00 gr"
+                    binding.tvProtein.text = "Protein:\t\t\t\t\t\t 0.00 gr"
+                    binding.tvLemak.text = "Lemak:\t\t\t\t\t\t\t 0.00 gr"
 
                     binding.btnTambah.isEnabled = false
                     binding.btnTambah.visibility = View.INVISIBLE
@@ -136,23 +138,41 @@ class DetailMakananActivity : AppCompatActivity() {
 
 
         // update value username
-        var total_karbohidrat = sharedPreferences.getValuesFloat("total_konsumsi_karbohidrat")
-        var total_protein = sharedPreferences.getValuesFloat("total_konsumsi_protein")
-        var total_lemak = sharedPreferences.getValuesFloat("total_konsumsi_lemak")
-
-        total_karbohidrat += arrayTotal[0]
-        total_protein += arrayTotal[1]
-        total_lemak += arrayTotal[2]
 
         db.collection("users").document(username!!)
             .collection("makan").document(tanggal_makan!!)
-            .update("total_konsumsi_karbohidrat",total_karbohidrat,
-            "total_konsumsi_protein", total_protein,
-            "total_konsumsi_lemak", total_lemak)
+            .get().addOnSuccessListener {
+                var total_karbohidrat:Float = (it.get("total_konsumsi_karbohidrat").toString()+"F").toFloat()
+                var total_protein:Float = (it.get("total_konsumsi_protein").toString()+"F").toFloat()
+                var total_lemak:Float = (it.get("total_konsumsi_lemak").toString()+"F").toFloat()
 
-        sharedPreferences.setValuesFloat("total_konsumsi_karbohidrat", total_karbohidrat)
-        sharedPreferences.setValuesFloat("total_konsumsi_protein", total_protein)
-        sharedPreferences.setValuesFloat("total_konsumsi_lemak",total_lemak)
+                total_karbohidrat += arrayTotal[0]
+                total_protein += arrayTotal[1]
+                total_lemak += arrayTotal[2]
+
+                db.collection("users").document(username!!)
+                    .collection("makan").document(tanggal_makan!!)
+                    .update("total_konsumsi_karbohidrat",total_karbohidrat,
+                    "total_konsumsi_protein", total_protein,
+                    "total_konsumsi_lemak", total_lemak)
+            }
+//        var total_karbohidrat = sharedPreferences.getValuesFloat("total_konsumsi_karbohidrat")
+//        var total_protein = sharedPreferences.getValuesFloat("total_konsumsi_protein")
+//        var total_lemak = sharedPreferences.getValuesFloat("total_konsumsi_lemak")
+//
+//        total_karbohidrat += arrayTotal[0]
+//        total_protein += arrayTotal[1]
+//        total_lemak += arrayTotal[2]
+//
+//        db.collection("users").document(username!!)
+//            .collection("makan").document(tanggal_makan!!)
+//            .update("total_konsumsi_karbohidrat",total_karbohidrat,
+//            "total_konsumsi_protein", total_protein,
+//            "total_konsumsi_lemak", total_lemak)
+//
+//        sharedPreferences.setValuesFloat("total_konsumsi_karbohidrat", total_karbohidrat)
+//        sharedPreferences.setValuesFloat("total_konsumsi_protein", total_protein)
+//        sharedPreferences.setValuesFloat("total_konsumsi_lemak",total_lemak)
 
     }
 
