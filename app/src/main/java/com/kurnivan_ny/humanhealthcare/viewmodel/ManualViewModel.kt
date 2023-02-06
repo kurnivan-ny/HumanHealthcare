@@ -14,11 +14,6 @@ class ManualViewModel: ViewModel() {
 
     val newmanual = MutableLiveData<ArrayList<ListManualModel>>(arrayListOf())
 
-    fun addDocument(data: ListManualModel){
-        val currentList = newmanual.value?: arrayListOf()
-        currentList.add(data)
-        newmanual.postValue(currentList)
-    }
 //
 //    fun getDocuments() = newmanual
 }

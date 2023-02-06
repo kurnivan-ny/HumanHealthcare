@@ -2,17 +2,17 @@ package com.kurnivan_ny.humanhealthcare.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.kurnivan_ny.humanhealthcare.data.model.manualinput.ListManualModel
 import com.kurnivan_ny.humanhealthcare.databinding.ListItemManualBinding
 
 interface OnItemClickListener {
-    fun onItemClick(position: Int, namamakanan: String)
+    fun onItemClick(position: Int, string: String)
 }
 
-class ListManualAdapter(var manualList: ArrayList<ListManualModel>): RecyclerView.Adapter<ListManualAdapter.ListManualViewHolder>() {
+class ListManualAdapter(var manualList: ArrayList<ListManualModel>):
+    RecyclerView.Adapter<ListManualAdapter.ListManualViewHolder>() {
 
 //    var onItemClick: ((ListManualModel) -> Unit)? = null
 
@@ -26,7 +26,8 @@ class ListManualAdapter(var manualList: ArrayList<ListManualModel>): RecyclerVie
         this.listener = listener
     }
 
-    inner class ListManualViewHolder(private val itemBinding: ListItemManualBinding): RecyclerView.ViewHolder(itemBinding.root){
+    inner class ListManualViewHolder(private val itemBinding: ListItemManualBinding):
+        RecyclerView.ViewHolder(itemBinding.root){
         fun bind(listManualModel: ListManualModel, position: Int){
 
             itemBinding.tvTitle.text = listManualModel.nama_makanan
