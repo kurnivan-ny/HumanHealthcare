@@ -46,6 +46,7 @@ class DashboardFragment : Fragment() {
     lateinit var calendar: Calendar
 //    lateinit var simpleDataFormat: SimpleDateFormat
     private lateinit var sTanggalMakan:String
+    private lateinit var sBulanMakan: String
 
     private lateinit var sUsername:String
     private lateinit var sUrl: String
@@ -159,12 +160,14 @@ class DashboardFragment : Fragment() {
 
                     sTanggalMakan = (dayOfMonth.toString() + " " + (arrayMonth[monthOfYear]) + " " + year)
 
+                    sBulanMakan = arrayMonth[monthOfYear]
+
                     loadingDialog()
 
                     viewModel.tanggal_makan.value = sTanggalMakan
 
-                    val konsumsi = updateKonsumsi(sTanggalMakan)
-                    checkMakan(sUsername,konsumsi)
+                    val konsumsi = updateKonsumsi(sTanggalMakan, sBulanMakan)
+                    checkMakan(sUsername, konsumsi)
 
                 }, year, month, day
             )
@@ -185,9 +188,11 @@ class DashboardFragment : Fragment() {
     }
 
 
-    private fun updateKonsumsi(sTanggalMakan: String): Konsumsi {
+    private fun updateKonsumsi(sTanggalMakan: String, sBulanMakan: String): Konsumsi {
         val konsumsi = Konsumsi()
+
         konsumsi.tanggal_makan = sTanggalMakan
+        konsumsi.bulan_makan = sBulanMakan
 
         konsumsi.total_konsumsi_karbohidrat = 0.00F
         konsumsi.total_konsumsi_protein = 0.00F
@@ -202,7 +207,7 @@ class DashboardFragment : Fragment() {
 
     private fun checkMakan(sUsername: String, data: Konsumsi) {
         db.collection("users").document(sUsername)
-            .collection("makan").document(data.tanggal_makan!!).get()
+            .collection(data.bulan_makan!!).document(data.tanggal_makan!!).get()
             .addOnSuccessListener { document ->
                 if (document.get("tanggal_makan") == null) {
                     savetoFirestore(sUsername, data)
@@ -210,6 +215,8 @@ class DashboardFragment : Fragment() {
                 else {
                     // Get Values From Firestore
                     sharedPreferences.setValuesString("tanggal_makan", document.get("tanggal_makan").toString())
+                    sharedPreferences.setValuesString("bulan_makan", document.get("bulan_makan").toString())
+
 
                     sharedPreferences.setValuesFloat("total_konsumsi_karbohidrat", (document.get("total_konsumsi_karbohidrat")
                         .toString().replace(",",".")+"F").toFloat())
@@ -222,6 +229,7 @@ class DashboardFragment : Fragment() {
                     sharedPreferences.setValuesString("status_konsumsi_protein", document.get("status_konsumsi_protein").toString())
                     sharedPreferences.setValuesString("status_konsumsi_lemak", document.get("status_konsumsi_lemak").toString())
 
+                    // viewModel
                     viewModel.total_karbohidrat_konsumsi.value = (document.get("total_konsumsi_karbohidrat")
                         .toString().replace(",",".")+"F").toFloat()
                     viewModel.total_protein_konsumsi.value = (document.get("total_konsumsi_protein")
@@ -234,10 +242,11 @@ class DashboardFragment : Fragment() {
 
     private fun savetoFirestore(sUsername: String, data: Konsumsi) {
         db.collection("users").document(sUsername)
-            .collection("makan").document(data.tanggal_makan!!)
+            .collection(data.bulan_makan!!).document(data.tanggal_makan!!)
             .set(data)
 
         sharedPreferences.setValuesString("tanggal_makan", data.tanggal_makan.toString())
+        sharedPreferences.setValuesString("bulan_makan", data.bulan_makan.toString())
 
         sharedPreferences.setValuesFloat("total_konsumsi_karbohidrat", (data.total_konsumsi_karbohidrat
             .toString().replace(",",".")+"F").toFloat())
@@ -317,7 +326,8 @@ class DashboardFragment : Fragment() {
 
     private fun updateKarbohidrattoFirestore(status_konsumsi_karbohidrat: String) {
         db.collection("users").document(sUsername)
-            .collection("makan").document(sharedPreferences.getValuesString("tanggal_makan")!!)
+            .collection(sharedPreferences.getValuesString("bulan_makan")!!)
+            .document(sharedPreferences.getValuesString("tanggal_makan")!!)
             .update(
                 "status_konsumsi_karbohidrat", status_konsumsi_karbohidrat,
             )
@@ -356,7 +366,8 @@ class DashboardFragment : Fragment() {
 
     private fun updateProteintoFirestore(status_konsumsi_protein: String) {
         db.collection("users").document(sUsername)
-            .collection("makan").document(sharedPreferences.getValuesString("tanggal_makan")!!)
+            .collection(sharedPreferences.getValuesString("bulan_makan")!!)
+            .document(sharedPreferences.getValuesString("tanggal_makan")!!)
             .update(
                 "status_konsumsi_protein", status_konsumsi_protein
             )
@@ -394,7 +405,8 @@ class DashboardFragment : Fragment() {
 
     private fun updateLemaktoFirestore(status_konsumsi_lemak: String) {
         db.collection("users").document(sUsername)
-            .collection("makan").document(sharedPreferences.getValuesString("tanggal_makan")!!)
+            .collection(sharedPreferences.getValuesString("bulan_makan")!!)
+            .document(sharedPreferences.getValuesString("tanggal_makan")!!)
             .update(
                 "status_konsumsi_lemak", status_konsumsi_lemak
             )

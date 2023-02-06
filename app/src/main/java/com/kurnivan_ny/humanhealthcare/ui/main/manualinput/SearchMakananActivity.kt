@@ -63,6 +63,7 @@ class SearchMakananActivity : AppCompatActivity() {
         val username = sharedPreferences.getValuesString("username")
         val tanggal_makan = sharedPreferences.getValuesString("tanggal_makan")
         val waktu_makan = sharedPreferences.getValuesString("waktu_makan")
+        val bulan_makan = sharedPreferences.getValuesString("bulan_makan")
 
         db.collection("food")
             .whereArrayContains("kata_kunci", searchText)
@@ -77,7 +78,7 @@ class SearchMakananActivity : AppCompatActivity() {
                     searchListAdapter.onItemClick = { food ->
 
                         db.collection("users").document(username!!)
-                            .collection("makan").document(tanggal_makan!!)
+                            .collection(bulan_makan!!).document(tanggal_makan!!)
                             .collection(waktu_makan!!).document(food.nama_makanan)
                             .get().addOnSuccessListener {
                                 if (it.get("nama_makanan") == null){

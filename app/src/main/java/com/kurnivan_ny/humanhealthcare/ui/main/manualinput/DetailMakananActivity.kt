@@ -120,6 +120,7 @@ class DetailMakananActivity : AppCompatActivity() {
         val username = sharedPreferences.getValuesString("username")
         val tanggal_makan = sharedPreferences.getValuesString("tanggal_makan")
         val waktu_makan = sharedPreferences.getValuesString("waktu_makan")
+        val bulan_makan = sharedPreferences.getValuesString("bulan_makan")
 
         val makan = Makan()
         makan.waktu_makan = waktu_makan
@@ -133,14 +134,14 @@ class DetailMakananActivity : AppCompatActivity() {
         makan.lemak = arrayTotal[2]
 
         db.collection("users").document(username!!)
-            .collection("makan").document(tanggal_makan!!)
+            .collection(bulan_makan!!).document(tanggal_makan!!)
             .collection(waktu_makan!!).document(namaMakanan).set(makan)
 
 
         // update value username
 
         db.collection("users").document(username!!)
-            .collection("makan").document(tanggal_makan!!)
+            .collection(bulan_makan!!).document(tanggal_makan!!)
             .get().addOnSuccessListener {
                 var total_karbohidrat:Float = (it.get("total_konsumsi_karbohidrat").toString()+"F").toFloat()
                 var total_protein:Float = (it.get("total_konsumsi_protein").toString()+"F").toFloat()
@@ -151,7 +152,7 @@ class DetailMakananActivity : AppCompatActivity() {
                 total_lemak += arrayTotal[2]
 
                 db.collection("users").document(username!!)
-                    .collection("makan").document(tanggal_makan!!)
+                    .collection(bulan_makan!!).document(tanggal_makan!!)
                     .update("total_konsumsi_karbohidrat",total_karbohidrat,
                     "total_konsumsi_protein", total_protein,
                     "total_konsumsi_lemak", total_lemak)

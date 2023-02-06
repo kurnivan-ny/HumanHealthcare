@@ -2,17 +2,29 @@ package com.kurnivan_ny.humanhealthcare.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.kurnivan_ny.humanhealthcare.data.model.manualinput.ListManualModel
 import com.kurnivan_ny.humanhealthcare.databinding.ListItemManualBinding
 
+interface OnItemClickListener {
+    fun onItemClick(position: Int, namamakanan: String)
+}
+
 class ListManualAdapter(var manualList: ArrayList<ListManualModel>): RecyclerView.Adapter<ListManualAdapter.ListManualViewHolder>() {
 
-    var onItemClick: ((ListManualModel) -> Unit)? = null
+//    var onItemClick: ((ListManualModel) -> Unit)? = null
 
     var username: String = ""
     var tanggal_makan: String = ""
+    var bulan_makan: String = ""
+
+    private lateinit var listener: OnItemClickListener
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.listener = listener
+    }
 
     inner class ListManualViewHolder(private val itemBinding: ListItemManualBinding): RecyclerView.ViewHolder(itemBinding.root){
         fun bind(listManualModel: ListManualModel, position: Int){
@@ -23,6 +35,16 @@ class ListManualAdapter(var manualList: ArrayList<ListManualModel>): RecyclerVie
             itemBinding.btnCancel.setOnClickListener {
                 deleteItem(position)
                 deleteFirestore(listManualModel)
+            }
+        }
+        init {
+            itemBinding.root.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION){
+                    listener.onItemClick(position, manualList[position].nama_makanan)
+                    notifyItemChanged(position)
+                    notifyDataSetChanged()
+                }
             }
         }
     }
@@ -39,12 +61,12 @@ class ListManualAdapter(var manualList: ArrayList<ListManualModel>): RecyclerVie
         val makanan:ListManualModel = manualList[position]
         holder.bind(makanan, position)
 
-        holder.itemView.setOnClickListener {
-            notifyItemChanged(position)
-            onItemClick?.invoke(makanan)
-            notifyItemChanged(position)
-            notifyDataSetChanged()
-        }
+//        holder.itemView.setOnClickListener {
+//            notifyItemChanged(position)
+//            onItemClick?.invoke(makanan)
+//            notifyItemChanged(position)
+//            notifyDataSetChanged()
+//        }
     }
 
     override fun getItemCount(): Int {
@@ -63,12 +85,12 @@ class ListManualAdapter(var manualList: ArrayList<ListManualModel>): RecyclerVie
         val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
         db.collection("users").document(username)
-            .collection("makan").document(tanggal_makan)
+            .collection(bulan_makan).document(tanggal_makan)
             .collection(listManualModel.waktu_makan).document(listManualModel.nama_makanan)
             .delete().addOnSuccessListener {
 
                 db.collection("users").document(username)
-                    .collection("makan").document(tanggal_makan)
+                    .collection(bulan_makan).document(tanggal_makan)
                     .get().addOnSuccessListener {
                         val total_konsumsi_karbohidrat:Float = (it.get("total_konsumsi_karbohidrat").toString()+"F").toFloat()
                         var total_karbohidrat = total_konsumsi_karbohidrat - listManualModel.karbohidrat
@@ -80,7 +102,7 @@ class ListManualAdapter(var manualList: ArrayList<ListManualModel>): RecyclerVie
                         val total_lemak = total_konsumsi_lemak - listManualModel.lemak
 
                         db.collection("users").document(username)
-                            .collection("makan").document(tanggal_makan)
+                            .collection(bulan_makan).document(tanggal_makan)
                             .update("total_konsumsi_karbohidrat",total_karbohidrat,
                                 "total_konsumsi_protein", total_protein,
                                 "total_konsumsi_lemak", total_lemak)

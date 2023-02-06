@@ -16,6 +16,7 @@ class User {
 }
 
 class Konsumsi {
+    var bulan_makan:String? = null
     var tanggal_makan:String? = null
 
     var total_konsumsi_karbohidrat:Float?= null

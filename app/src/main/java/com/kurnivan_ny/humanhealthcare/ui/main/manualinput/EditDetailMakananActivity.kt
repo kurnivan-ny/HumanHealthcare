@@ -106,6 +106,7 @@ class EditDetailMakananActivity : AppCompatActivity() {
         val username = sharedPreferences.getValuesString("username")
         val tanggal_makan = sharedPreferences.getValuesString("tanggal_makan")
         val waktu_makan = sharedPreferences.getValuesString("waktu_makan")
+        val bulan_makan = sharedPreferences.getValuesString("bulan_makan")
 
         binding.edtNamaMakanan.text = namaMakanan
         storage.reference.child("image_profile/$imgUrl").downloadUrl.addOnSuccessListener { Uri ->
@@ -116,7 +117,7 @@ class EditDetailMakananActivity : AppCompatActivity() {
         }
 
         db.collection("users").document(username!!)
-            .collection("makan").document(tanggal_makan!!)
+            .collection(bulan_makan!!).document(tanggal_makan!!)
             .collection(waktu_makan!!).document(namaMakanan)
             .get().addOnSuccessListener {
                 val beratMakanan = it.get("berat_makanan").toString()
@@ -182,9 +183,11 @@ class EditDetailMakananActivity : AppCompatActivity() {
     }
 
     private fun saveMakanantoFirestore(namaMakanan: String, satuan: String, beratMakanan: Int, arrayTotal: FloatArray) {
+
         val username = sharedPreferences.getValuesString("username")
         val tanggal_makan = sharedPreferences.getValuesString("tanggal_makan")
         val waktu_makan = sharedPreferences.getValuesString("waktu_makan")
+        val bulan_makan = sharedPreferences.getValuesString("bulan_makan")
 
 //        deleteFirestore(namaMakanan)
 
@@ -202,7 +205,7 @@ class EditDetailMakananActivity : AppCompatActivity() {
         // update value username
 
         db.collection("users").document(username!!)
-            .collection("makan").document(tanggal_makan!!)
+            .collection(bulan_makan!!).document(tanggal_makan!!)
             .collection(waktu_makan!!).document(namaMakanan)
             .get().addOnSuccessListener {
                 var karbohidrat:Float = (it.get("karbohidrat").toString()+"F").toFloat()
@@ -210,7 +213,7 @@ class EditDetailMakananActivity : AppCompatActivity() {
                 var lemak:Float = (it.get("lemak").toString()+"F").toFloat()
 
                 db.collection("users").document(username!!)
-                    .collection("makan").document(tanggal_makan!!)
+                    .collection(bulan_makan!!).document(tanggal_makan!!)
                     .get().addOnSuccessListener {
                         var total_karbohidrat:Float = (it.get("total_konsumsi_karbohidrat").toString()+"F").toFloat()
                         var total_protein:Float = (it.get("total_konsumsi_protein").toString()+"F").toFloat()
@@ -221,13 +224,13 @@ class EditDetailMakananActivity : AppCompatActivity() {
                         total_lemak = total_lemak + arrayTotal[2] - lemak
 
                         db.collection("users").document(username!!)
-                            .collection("makan").document(tanggal_makan!!)
+                            .collection(bulan_makan!!).document(tanggal_makan!!)
                             .update("total_konsumsi_karbohidrat",total_karbohidrat,
                                 "total_konsumsi_protein", total_protein,
                                 "total_konsumsi_lemak", total_lemak)
 
                         db.collection("users").document(username!!)
-                            .collection("makan").document(tanggal_makan!!)
+                            .collection(bulan_makan!!).document(tanggal_makan!!)
                             .collection(waktu_makan!!).document(namaMakanan).set(makan)
                     }
             }
