@@ -1,4 +1,4 @@
-package com.kurnivan_ny.humanhealthcare.data.pushFirestore
+package com.kurnivan_ny.humanhealthcare.data.modelFirestore
 
 class User {
     var email:String?= null

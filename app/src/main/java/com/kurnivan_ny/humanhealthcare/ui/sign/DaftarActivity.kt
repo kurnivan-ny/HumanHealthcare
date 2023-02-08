@@ -12,7 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.kurnivan_ny.humanhealthcare.ui.main.HomeActivity
 import com.kurnivan_ny.humanhealthcare.R
 import com.kurnivan_ny.humanhealthcare.databinding.ActivityDaftarBinding
-import com.kurnivan_ny.humanhealthcare.data.pushFirestore.User
+import com.kurnivan_ny.humanhealthcare.data.modelFirestore.User
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 import java.nio.FloatBuffer
 
@@ -71,18 +71,46 @@ class DaftarActivity : AppCompatActivity() {
             } else if (sBerat.equals("")){
                 binding.edtBeratBadan.error = "Silakan isi Berat Badan (kg)"
                 binding.edtBeratBadan.requestFocus()
-            } else {
+            } else if (sUsername.equals("")){
+                binding.edtUsername.error = "Silakan isi Username"
+                binding.edtUsername.requestFocus()
+            } else if (sEmail.equals("")){
+                binding.edtEmail.error = "Silakan isi Email"
+                binding.edtPassword.requestFocus()
+            } else if (sPassword.equals("")){
+                binding.edtPassword.error = "Silakan isi Password"
+                binding.edtPassword.requestFocus()
+            } else if (sPassword.length<6){
+                binding.edtPassword.error = "Password Anda masih kurang dari 6 karakter"
+            }
+            else {
 
-                var statusUsername = sUsername.indexOf(".")
+                val tanda_baca = arrayOf("&", "=", "_", "\'", "-", "+", ",","<", ">", ".", "/", "\"", "\\")
+                val statusList: MutableList<Int> = arrayListOf()
+                for (tanda in tanda_baca){
+                    var statusUsername = sUsername.indexOf(tanda)
+                    if(statusUsername == -1){
+                        continue
+                    } else {
+                        statusList.add(statusUsername)
+                    }
+                }
 
-
-                if (statusUsername >= 0){
-                    binding.edtUsername.error = "Silakan isi Username tanpa ."
-                    binding.edtUsername.requestFocus()
-                } else {
+                if (statusList.isEmpty()){
                     var TotalEnergi:Float = predictRegressi(sJenisKelamin, sUmur, sTinggi, sBerat)
                     saveUser(sNama, sJenisKelamin, sUmur, sTinggi, sBerat, sUsername, sEmail, sPassword, TotalEnergi)
+                } else {
+                    binding.edtUsername.error = "Username tidak boleh terdapat karakter &=_'-+,<>./\"\\"
+                    binding.edtUsername.requestFocus()
                 }
+//                var statusUsername = sUsername.indexOf(".")
+//                if (statusUsername >= 0){
+//                    binding.edtUsername.error = "Silakan isi Username tanpa ."
+//                    binding.edtUsername.requestFocus()
+//                } else {
+//                    var TotalEnergi:Float = predictRegressi(sJenisKelamin, sUmur, sTinggi, sBerat)
+//                    saveUser(sNama, sJenisKelamin, sUmur, sTinggi, sBerat, sUsername, sEmail, sPassword, TotalEnergi)
+//                }
             }
         }
 

@@ -3,7 +3,6 @@ package com.kurnivan_ny.humanhealthcare.ui.main.manualinput
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -13,9 +12,8 @@ import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.kurnivan_ny.humanhealthcare.R
-import com.kurnivan_ny.humanhealthcare.data.pushFirestore.Makan
+import com.kurnivan_ny.humanhealthcare.data.modelFirestore.Makan
 import com.kurnivan_ny.humanhealthcare.databinding.ActivityEditDetailMakananBinding
-import com.kurnivan_ny.humanhealthcare.ui.dialog.LoadingDialog
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 
 class EditDetailMakananActivity : AppCompatActivity() {

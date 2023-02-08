@@ -13,7 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.kurnivan_ny.humanhealthcare.R
 import com.kurnivan_ny.humanhealthcare.databinding.ActivityDetailMakananBinding
-import com.kurnivan_ny.humanhealthcare.data.pushFirestore.Makan
+import com.kurnivan_ny.humanhealthcare.data.modelFirestore.Makan
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 
 

@@ -9,7 +9,7 @@ import androidx.navigation.findNavController
 import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentPengaturanAkunBinding
-import com.kurnivan_ny.humanhealthcare.data.pushFirestore.User
+import com.kurnivan_ny.humanhealthcare.data.modelFirestore.User
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 
 /**

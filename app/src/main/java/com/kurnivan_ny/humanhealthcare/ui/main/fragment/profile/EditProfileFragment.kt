@@ -20,7 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.kurnivan_ny.humanhealthcare.R
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentEditProfileBinding
-import com.kurnivan_ny.humanhealthcare.data.pushFirestore.User
+import com.kurnivan_ny.humanhealthcare.data.modelFirestore.User
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 import java.nio.FloatBuffer
 import java.util.*

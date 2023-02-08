@@ -20,7 +20,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.kurnivan_ny.humanhealthcare.ui.main.manualinput.ManualActivity
 import com.kurnivan_ny.humanhealthcare.R
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentDashboardBinding
-import com.kurnivan_ny.humanhealthcare.data.pushFirestore.Konsumsi
+import com.kurnivan_ny.humanhealthcare.data.modelFirestore.Konsumsi
 import com.kurnivan_ny.humanhealthcare.ui.dialog.LoadingDialog
 import com.kurnivan_ny.humanhealthcare.viewmodel.DashboardViewModel
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
