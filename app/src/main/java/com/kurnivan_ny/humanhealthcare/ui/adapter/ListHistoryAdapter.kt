@@ -20,7 +20,7 @@ class ListHistoryAdapter(var historyList: ArrayList<ListHistoryModel>):
 
     inner class ListHistoryViewModel(private val itemBinding: ListHistoryBinding):
         RecyclerView.ViewHolder(itemBinding.root){
-        fun bind(listHistoryModel: ListHistoryModel, position: Int){
+        fun bind(listHistoryModel: ListHistoryModel){
 
             itemBinding.tvTitle.text = listHistoryModel.tanggal_makan
 
@@ -60,7 +60,7 @@ class ListHistoryAdapter(var historyList: ArrayList<ListHistoryModel>):
 
     override fun onBindViewHolder(holder: ListHistoryViewModel, position: Int) {
         val history: ListHistoryModel = historyList[position]
-        holder.bind(history, position)
+        holder.bind(history)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):

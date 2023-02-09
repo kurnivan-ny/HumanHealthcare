@@ -1,7 +1,6 @@
 package com.kurnivan_ny.humanhealthcare.ui.main.fragment.history
 
 import android.os.Bundle
-import android.transition.Slide
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,11 +9,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.*
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.storage.FirebaseStorage
 import com.kurnivan_ny.humanhealthcare.R
 import com.kurnivan_ny.humanhealthcare.data.model.history.ListHistoryModel
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentHistoryBinding
@@ -23,16 +19,6 @@ import com.kurnivan_ny.humanhealthcare.viewmodel.HistoryViewModel
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HistoryFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class HistoryFragment : Fragment() {
 
     private var _binding: FragmentHistoryBinding? = null

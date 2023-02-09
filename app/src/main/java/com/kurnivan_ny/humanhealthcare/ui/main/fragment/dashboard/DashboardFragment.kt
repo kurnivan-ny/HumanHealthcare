@@ -158,7 +158,11 @@ class DashboardFragment : Fragment() {
                     val arrayMonth = arrayOf("Januari", "Februari", "Maret", "April", "Mei", "Juni",
                         "Juli", "Agustus", "September", "Oktober", "November", "Desember")
 
-                    sTanggalMakan = (dayOfMonth.toString() + " " + (arrayMonth[monthOfYear]) + " " + year)
+                    sTanggalMakan = if (dayOfMonth<10){
+                        "0" + (dayOfMonth.toString() + " " + (arrayMonth[monthOfYear]) + " " + year)
+                    } else {
+                        (dayOfMonth.toString() + " " + (arrayMonth[monthOfYear]) + " " + year)
+                    }
 
                     sBulanMakan = arrayMonth[monthOfYear]
 

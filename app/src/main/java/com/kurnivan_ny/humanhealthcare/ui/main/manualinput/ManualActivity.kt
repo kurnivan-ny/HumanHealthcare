@@ -107,15 +107,6 @@ class ManualActivity : AppCompatActivity() {
         })
     }
 
-//        manualListAdapter.onItemClick = { food ->
-//            // To Detail Activity
-//            val intent = Intent(this@ManualActivity, EditDetailMakananActivity::class.java)
-//            intent.putExtra("nama_makanan", food.nama_makanan)
-//            startActivity(intent)
-//            manualListAdapter.notifyDataSetChanged()
-//            finishAffinity()
-//        }
-
     private fun loadingDialog() {
         val loading = LoadingDialog(this)
         loading.startLoading()

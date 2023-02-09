@@ -92,21 +92,24 @@ class EditDetailMakananActivity : AppCompatActivity() {
             // setting image
             val img_url = document.get("url_foto").toString()
 
-            var karbohidrat = (document.get("karbohidrat_100gr").toString() + "F").toFloat()
-            var protein = (document.get("protein_100gr").toString() + "F").toFloat()
-            var lemak = (document.get("lemak_100gr").toString() + "F").toFloat()
+            val beratPorsi = (document.get("berat_porsi_gr").toString() + "F").toFloat()
 
-            setUpForm(nama_makanan, img_url, karbohidrat, protein, lemak)
+            val karbohidrat = (document.get("karbohidrat_100gr").toString() + "F").toFloat()
+            val protein = (document.get("protein_100gr").toString() + "F").toFloat()
+            val lemak = (document.get("lemak_100gr").toString() + "F").toFloat()
+
+            setUpForm(nama_makanan, img_url, beratPorsi, karbohidrat, protein, lemak)
         }
     }
 
-    private fun setUpForm(namaMakanan: String, imgUrl: String, karbohidrat: Float, protein: Float, lemak: Float) {
+    private fun setUpForm(namaMakanan: String, imgUrl: String, beratPorsi:Float, karbohidrat: Float, protein: Float, lemak: Float) {
         val username = sharedPreferences.getValuesString("username")
         val tanggal_makan = sharedPreferences.getValuesString("tanggal_makan")
         val waktu_makan = sharedPreferences.getValuesString("waktu_makan")
         val bulan_makan = sharedPreferences.getValuesString("bulan_makan")
 
         binding.edtNamaMakanan.text = namaMakanan
+
         storage.reference.child("image_profile/$imgUrl").downloadUrl.addOnSuccessListener { Uri ->
             Glide.with(this)
                 .load(Uri)
@@ -136,7 +139,7 @@ class EditDetailMakananActivity : AppCompatActivity() {
                     override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                         satuan = binding.edtSatuanMakanan.text.toString()
 
-                        var berat_makanan = binding.edtBeratMakanan.text.toString()
+                        val berat_makanan = binding.edtBeratMakanan.text.toString()
 
                         if (berat_makanan.equals("") or berat_makanan.equals("0")){
 
@@ -148,8 +151,8 @@ class EditDetailMakananActivity : AppCompatActivity() {
                             binding.btnTambah.visibility = View.INVISIBLE
                         } else {
 
-                            var beratMakanan = berat_makanan.toInt()
-                            val arrayTotal = hitungKebutuhan(beratMakanan, karbohidrat, protein, lemak)
+                            val beratMakanan = berat_makanan.toInt()
+                            val arrayTotal = hitungKebutuhan(beratMakanan, beratPorsi, karbohidrat, protein, lemak)
 
                             binding.btnTambah.isEnabled = true
                             binding.btnTambah.visibility = View.VISIBLE
@@ -173,8 +176,9 @@ class EditDetailMakananActivity : AppCompatActivity() {
                 })
 
                 val satuanBeratMakanan = it.get("satuan_makanan").toString()
-                val satuan_makanan = resources.getStringArray(R.array.satuan)
-                val arrayAdapterSatuan = ArrayAdapter(this, R.layout.dropdown_item, satuan_makanan)
+
+                val satuanMakanan = resources.getStringArray(R.array.satuan)
+                val arrayAdapterSatuan = ArrayAdapter(this, R.layout.dropdown_item, satuanMakanan)
                 binding.edtSatuanMakanan.setText(satuanBeratMakanan)
                 binding.edtSatuanMakanan.setAdapter(arrayAdapterSatuan)
             }
@@ -194,7 +198,7 @@ class EditDetailMakananActivity : AppCompatActivity() {
 
         makan.nama_makanan = namaMakanan
         makan.satuan_makanan = satuan
-        makan. berat_makanan = beratMakanan
+        makan.berat_makanan = beratMakanan
 
         makan.karbohidrat = arrayTotal[0]
         makan.protein = arrayTotal[1]
@@ -206,32 +210,38 @@ class EditDetailMakananActivity : AppCompatActivity() {
             .collection(bulan_makan!!).document(tanggal_makan!!)
             .collection(waktu_makan!!).document(namaMakanan)
             .get().addOnSuccessListener {
-                var karbohidrat:Float = (it.get("karbohidrat").toString()+"F").toFloat()
-                var protein:Float = (it.get("protein").toString()+"F").toFloat()
-                var lemak:Float = (it.get("lemak").toString()+"F").toFloat()
+                val karbohidrat: Float = (it.get("karbohidrat").toString() + "F").toFloat()
+                val protein: Float = (it.get("protein").toString() + "F").toFloat()
+                val lemak: Float = (it.get("lemak").toString() + "F").toFloat()
 
-                db.collection("users").document(username!!)
-                    .collection(bulan_makan!!).document(tanggal_makan!!)
+                db.collection("users").document(username)
+                    .collection(bulan_makan).document(tanggal_makan)
                     .get().addOnSuccessListener {
-                        var total_karbohidrat:Float = (it.get("total_konsumsi_karbohidrat").toString()+"F").toFloat()
-                        var total_protein:Float = (it.get("total_konsumsi_protein").toString()+"F").toFloat()
-                        var total_lemak:Float = (it.get("total_konsumsi_lemak").toString()+"F").toFloat()
+                        var total_karbohidrat: Float =
+                            (it.get("total_konsumsi_karbohidrat").toString() + "F").toFloat()
+                        var total_protein: Float =
+                            (it.get("total_konsumsi_protein").toString() + "F").toFloat()
+                        var total_lemak: Float =
+                            (it.get("total_konsumsi_lemak").toString() + "F").toFloat()
 
-                        total_karbohidrat = total_karbohidrat +  arrayTotal[0] - karbohidrat
+                        total_karbohidrat = total_karbohidrat + arrayTotal[0] - karbohidrat
                         total_protein = total_protein + arrayTotal[1] - protein
                         total_lemak = total_lemak + arrayTotal[2] - lemak
 
-                        db.collection("users").document(username!!)
-                            .collection(bulan_makan!!).document(tanggal_makan!!)
-                            .update("total_konsumsi_karbohidrat",total_karbohidrat,
+                        db.collection("users").document(username)
+                            .collection(bulan_makan).document(tanggal_makan)
+                            .update(
+                                "total_konsumsi_karbohidrat", total_karbohidrat,
                                 "total_konsumsi_protein", total_protein,
-                                "total_konsumsi_lemak", total_lemak)
+                                "total_konsumsi_lemak", total_lemak
+                            )
 
-                        db.collection("users").document(username!!)
-                            .collection(bulan_makan!!).document(tanggal_makan!!)
-                            .collection(waktu_makan!!).document(namaMakanan).set(makan)
+                        db.collection("users").document(username)
+                            .collection(bulan_makan).document(tanggal_makan)
+                            .collection(waktu_makan).document(namaMakanan).set(makan)
                     }
             }
+    }
 
 //        var total_karbohidrat = sharedPreferences.getValuesFloat("total_konsumsi_karbohidrat")
 //        var total_protein = sharedPreferences.getValuesFloat("total_konsumsi_protein")
@@ -251,20 +261,20 @@ class EditDetailMakananActivity : AppCompatActivity() {
 //        sharedPreferences.setValuesFloat("total_konsumsi_protein", total_protein)
 //        sharedPreferences.setValuesFloat("total_konsumsi_lemak",total_lemak)
 
-    }
 
-    private fun hitungKebutuhan(beratMakanan: Int, karbohidrat: Float, protein: Float, lemak: Float): FloatArray {
+    private fun hitungKebutuhan(beratMakanan: Int, beratPorsi: Float, karbohidrat: Float, protein: Float, lemak: Float): FloatArray {
 
         var total_karbohidrat:Float? = 0.00F
         var total_protein:Float? = 0.00F
         var total_lemak: Float? = 0.00F
 
-        if (satuan.equals("hidangan")){
-            var berat_hidangan_gr = 100 // edit
 
-            total_karbohidrat = karbohidrat * berat_hidangan_gr * beratMakanan / 100
-            total_protein = protein * berat_hidangan_gr * beratMakanan / 100
-            total_lemak = lemak * berat_hidangan_gr * beratMakanan / 100
+        if (satuan.equals("porsi")){
+//            var berat_porsi_gr = 100 // edit
+
+            total_karbohidrat = karbohidrat/100 * beratPorsi * beratMakanan
+            total_protein = protein/100 * beratPorsi * beratMakanan
+            total_lemak = lemak/100 * beratPorsi * beratMakanan
 
             binding.tvKarbohidrat.text = "Karbohidrat:\t ${String.format("%.2f",total_karbohidrat)} gr"
             binding.tvProtein.text = "Protein:\t\t\t\t\t\t ${String.format("%.2f",total_protein)} gr"
@@ -272,9 +282,9 @@ class EditDetailMakananActivity : AppCompatActivity() {
         }
         else if (satuan.equals("gram")){
 
-            total_karbohidrat = karbohidrat * beratMakanan / 100
-            total_protein = protein * beratMakanan / 100
-            total_lemak = lemak * beratMakanan / 100
+            total_karbohidrat = karbohidrat/100 * beratMakanan
+            total_protein = protein/100 * beratMakanan
+            total_lemak = lemak/100 * beratMakanan
 
             binding.tvKarbohidrat.text = "Karbohidrat:\t ${String.format("%.2f",total_karbohidrat)} gr"
             binding.tvProtein.text = "Protein:\t\t\t\t\t\t ${String.format("%.2f",total_protein)} gr"

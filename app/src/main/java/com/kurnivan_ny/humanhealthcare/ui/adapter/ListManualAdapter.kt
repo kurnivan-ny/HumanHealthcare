@@ -14,8 +14,6 @@ interface OnItemClickListener {
 class ListManualAdapter(var manualList: ArrayList<ListManualModel>):
     RecyclerView.Adapter<ListManualAdapter.ListManualViewHolder>() {
 
-//    var onItemClick: ((ListManualModel) -> Unit)? = null
-
     var username: String = ""
     var tanggal_makan: String = ""
     var bulan_makan: String = ""
@@ -61,13 +59,6 @@ class ListManualAdapter(var manualList: ArrayList<ListManualModel>):
     override fun onBindViewHolder(holder: ListManualViewHolder, position: Int) {
         val makanan:ListManualModel = manualList[position]
         holder.bind(makanan, position)
-
-//        holder.itemView.setOnClickListener {
-//            notifyItemChanged(position)
-//            onItemClick?.invoke(makanan)
-//            notifyItemChanged(position)
-//            notifyDataSetChanged()
-//        }
     }
 
     override fun getItemCount(): Int {

@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.kurnivan_ny.humanhealthcare.R
@@ -26,11 +25,7 @@ import java.nio.FloatBuffer
 import java.util.*
 import android.net.Uri as Uri
 
-/**
- * A simple [Fragment] subclass.
- * Use the [EditProfileFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+
 class EditProfileFragment : Fragment() {
 
     //BINDING
@@ -49,8 +44,6 @@ class EditProfileFragment : Fragment() {
     private lateinit var sTinggi:String
     private lateinit var sBerat:String
 
-    private lateinit var TotalEnergi:String
-
     val imagefile = UUID.randomUUID().toString()
 
     //FILE
@@ -63,7 +56,7 @@ class EditProfileFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
         return binding.root
@@ -151,7 +144,7 @@ class EditProfileFragment : Fragment() {
                 if (::filePath.isInitialized) {
                     addImagetoCloudStorage(filePath, imagefile, sUsername)
                 }
-                var TotalEnergi:Float = predictRegressi(sJenisKelamin, sUmur, sTinggi, sBerat)
+                val TotalEnergi:Float = predictRegressi(sJenisKelamin, sUmur, sTinggi, sBerat)
                 saveUser(sNama, sJenisKelamin, sUmur, sTinggi, sBerat, sUsername, TotalEnergi)
                 val toProfileFragment =
                     EditProfileFragmentDirections.actionEditProfileFragmentToProfileFragment()
@@ -170,19 +163,39 @@ class EditProfileFragment : Fragment() {
         storage.reference.child("image_profile/$imagefile")
             .putFile(filePath)
 
-        db.collection("users").document(sUsername!!)
-            .update(
-                "url", imagefile,
-            )
+        db.collection("users").document(sUsername)
+            .get().addOnSuccessListener {
+                val urls = it.get("url").toString()
+                if (urls.equals("default.png")){
+                    db.collection("users").document(sUsername)
+                        .update(
+                            "url", imagefile,
+                        )
+                } else {
+                    storage.reference.child("image_profile/$urls")
+                        .delete()
+                    db.collection("users").document(sUsername)
+                        .update(
+                            "url", imagefile,
+                        )
+                }
+            }
+
+//        db.collection("users").document(sUsername!!)
+//            .update(
+//                "url", imagefile,
+//            )
 
         sharedPreferences.setValuesString("url", imagefile)
+    }
 //                .addOnSuccessListener {
 //                    Toast.makeText(activity, "Uploaded", Toast.LENGTH_LONG).show()
 //                }
 //                .addOnFailureListener { e ->
 //                    Toast.makeText(activity, "Failed" + e.message, Toast.LENGTH_LONG).show()
 //                }
-    }
+
+
 //    private fun uploadImage() {
 //        if (filePath != null){
 //            val ref = storageReference.child("image_profile/" + imagefile)
@@ -231,7 +244,7 @@ class EditProfileFragment : Fragment() {
         val arrayAdapterJenisKelamin = ArrayAdapter(requireContext(),
             R.layout.dropdown_item, jeniskelamin)
 
-        var sUrl = sharedPreferences.getValuesString("url").toString()
+        val sUrl = sharedPreferences.getValuesString("url").toString()
 
         storage.reference.child("image_profile/$sUrl").downloadUrl.addOnSuccessListener { Uri ->
             Glide.with(this)
@@ -326,7 +339,7 @@ class EditProfileFragment : Fragment() {
 
     private fun predictRegressi(sJenisKelamin: String, sUmur: String, sTinggi: String, sBerat: String): Float {
 
-        var TotalEnergi:Float = if (sJenisKelamin.equals("Laki-laki")){
+        val TotalEnergi:Float = if (sJenisKelamin.equals("Laki-laki")){
             val floatBufferInputs = FloatBuffer.wrap(
                 floatArrayOf(
                     sUmur.toFloat(),
@@ -357,8 +370,8 @@ class EditProfileFragment : Fragment() {
         val ortSession = createORTSession(ortEnvironment)
         val output = runPrediction(floatBufferInputs, ortSession, ortEnvironment)
 
-        var TotalEnergi:Float = (String.format("%.2f", output).replace(",",".") + "F").toFloat()
-
+//        val TotalEnergi:Float = (String.format("%.2f", output).replace(",",".") + "F").toFloat()
+        val TotalEnergi:Float = (output.toString() + "F").replace(",",".").toFloat()
         return TotalEnergi
 
     }

@@ -50,15 +50,17 @@ class DetailMakananActivity : AppCompatActivity() {
             // setting image
             val img_url = document.get("url_foto").toString()
 
-            var karbohidrat = (document.get("karbohidrat_100gr").toString() + "F").toFloat()
-            var protein = (document.get("protein_100gr").toString() + "F").toFloat()
-            var lemak = (document.get("lemak_100gr").toString() + "F").toFloat()
+            val beratPorsi = (document.get("berat_porsi_gr").toString() + "F").toFloat()
 
-            setUpForm(nama_makanan, img_url, karbohidrat, protein, lemak)
+            val karbohidrat = (document.get("karbohidrat_100gr").toString() + "F").toFloat()
+            val protein = (document.get("protein_100gr").toString() + "F").toFloat()
+            val lemak = (document.get("lemak_100gr").toString() + "F").toFloat()
+
+            setUpForm(nama_makanan, img_url, beratPorsi, karbohidrat, protein, lemak)
         }
     }
 
-    private fun setUpForm(namaMakanan: String, imgUrl: String, karbohidrat: Float, protein: Float, lemak: Float) {
+    private fun setUpForm(namaMakanan: String, imgUrl: String, beratPorsi: Float, karbohidrat: Float, protein: Float, lemak: Float) {
         binding.edtNamaMakanan.text = namaMakanan
         storage.reference.child("image_profile/$imgUrl").downloadUrl.addOnSuccessListener { Uri ->
             Glide.with(this)
@@ -67,9 +69,9 @@ class DetailMakananActivity : AppCompatActivity() {
                 .into(binding.ivMakanan)
         }
 
-        val satuan_makanan = resources.getStringArray(R.array.satuan)
-        val arrayAdapterSatuan = ArrayAdapter(this, R.layout.dropdown_item, satuan_makanan)
-        binding.edtSatuanMakanan.setText("hidangan")
+        val satuanMakanan = resources.getStringArray(R.array.satuan)
+        val arrayAdapterSatuan = ArrayAdapter(this, R.layout.dropdown_item, satuanMakanan)
+        binding.edtSatuanMakanan.setText("porsi")
         binding.edtSatuanMakanan.setAdapter(arrayAdapterSatuan)
 
         binding.btnTambah.isEnabled = false
@@ -80,7 +82,7 @@ class DetailMakananActivity : AppCompatActivity() {
 
                 satuan = binding.edtSatuanMakanan.text.toString()
 
-                var berat_makanan = binding.edtBeratMakanan.text.toString()
+                val berat_makanan = binding.edtBeratMakanan.text.toString()
 
                 if (berat_makanan.equals("") or berat_makanan.equals("0")){
 
@@ -91,8 +93,8 @@ class DetailMakananActivity : AppCompatActivity() {
                     binding.btnTambah.isEnabled = false
                     binding.btnTambah.visibility = View.INVISIBLE
                 } else {
-                    var beratMakanan = berat_makanan.toInt()
-                    val arrayTotal = hitungKebutuhan(beratMakanan, karbohidrat, protein, lemak)
+                    val beratMakanan = berat_makanan.toInt()
+                    val arrayTotal = hitungKebutuhan(beratMakanan, beratPorsi, karbohidrat, protein, lemak)
 
                     binding.btnTambah.isEnabled = true
                     binding.btnTambah.visibility = View.VISIBLE
@@ -137,11 +139,10 @@ class DetailMakananActivity : AppCompatActivity() {
             .collection(bulan_makan!!).document(tanggal_makan!!)
             .collection(waktu_makan!!).document(namaMakanan).set(makan)
 
-
         // update value username
 
-        db.collection("users").document(username!!)
-            .collection(bulan_makan!!).document(tanggal_makan!!)
+        db.collection("users").document(username)
+            .collection(bulan_makan).document(tanggal_makan)
             .get().addOnSuccessListener {
                 var total_karbohidrat:Float = (it.get("total_konsumsi_karbohidrat").toString()+"F").toFloat()
                 var total_protein:Float = (it.get("total_konsumsi_protein").toString()+"F").toFloat()
@@ -151,12 +152,13 @@ class DetailMakananActivity : AppCompatActivity() {
                 total_protein += arrayTotal[1]
                 total_lemak += arrayTotal[2]
 
-                db.collection("users").document(username!!)
-                    .collection(bulan_makan!!).document(tanggal_makan!!)
+                db.collection("users").document(username)
+                    .collection(bulan_makan).document(tanggal_makan)
                     .update("total_konsumsi_karbohidrat",total_karbohidrat,
                     "total_konsumsi_protein", total_protein,
                     "total_konsumsi_lemak", total_lemak)
             }
+
 //        var total_karbohidrat = sharedPreferences.getValuesFloat("total_konsumsi_karbohidrat")
 //        var total_protein = sharedPreferences.getValuesFloat("total_konsumsi_protein")
 //        var total_lemak = sharedPreferences.getValuesFloat("total_konsumsi_lemak")
@@ -177,18 +179,20 @@ class DetailMakananActivity : AppCompatActivity() {
 
     }
 
-    private fun hitungKebutuhan(beratMakanan: Int, karbohidrat: Float, protein: Float, lemak: Float): FloatArray {
+    private fun hitungKebutuhan(beratMakanan: Int, beratPorsi: Float, karbohidrat: Float, protein: Float, lemak: Float): FloatArray {
 
         var total_karbohidrat:Float? = null
         var total_protein:Float? = null
         var total_lemak: Float? = null
 
-        if (satuan.equals("hidangan")){
-            var berat_hidangan_gr = 100 // edit
+        // berat karbohidrat, protein, dan lemak dalam 100 gram
 
-            total_karbohidrat = karbohidrat * berat_hidangan_gr * beratMakanan / 100
-            total_protein = protein * berat_hidangan_gr * beratMakanan / 100
-            total_lemak = lemak * berat_hidangan_gr * beratMakanan / 100
+        if (satuan.equals("porsi")){
+//            val berat_porsi_gr = 100 // edit
+
+            total_karbohidrat = karbohidrat/100 * beratPorsi * beratMakanan //porsi
+            total_protein = protein/100 * beratPorsi * beratMakanan
+            total_lemak = lemak/100 * beratPorsi * beratMakanan
 
             binding.tvKarbohidrat.text = "Karbohidrat:\t ${String.format("%.2f",total_karbohidrat)} gr"
             binding.tvProtein.text = "Protein:\t\t\t\t\t\t ${String.format("%.2f",total_protein)} gr"
@@ -196,9 +200,9 @@ class DetailMakananActivity : AppCompatActivity() {
         }
         else if (satuan.equals("gram")){
 
-            total_karbohidrat = karbohidrat * beratMakanan / 100
-            total_protein = protein * beratMakanan / 100
-            total_lemak = lemak * beratMakanan / 100
+            total_karbohidrat = karbohidrat/100 * beratMakanan //gram
+            total_protein = protein/100 * beratMakanan
+            total_lemak = lemak/100 * beratMakanan
 
             binding.tvKarbohidrat.text = "Karbohidrat:\t ${String.format("%.2f",total_karbohidrat)} gr"
             binding.tvProtein.text = "Protein:\t\t\t\t\t\t ${String.format("%.2f",total_protein)} gr"

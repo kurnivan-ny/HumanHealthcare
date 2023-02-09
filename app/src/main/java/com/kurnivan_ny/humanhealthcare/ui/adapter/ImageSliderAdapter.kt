@@ -28,5 +28,7 @@ class ImageSliderAdapter(private val items: List<ImageData>): RecyclerView.Adapt
         holder.bind(items[position])
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int{
+        return items.size
+    }
 }

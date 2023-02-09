@@ -7,13 +7,5 @@ import com.kurnivan_ny.humanhealthcare.data.model.manualinput.ListManualModel
 
 
 class ManualViewModel: ViewModel() {
-
-//    val newmanual: MutableLiveData<ArrayList<ListManualModel>> by lazy {
-//        MutableLiveData<ArrayList<ListManualModel>>()
-//    }
-
     val newmanual = MutableLiveData<ArrayList<ListManualModel>>(arrayListOf())
-
-//
-//    fun getDocuments() = newmanual
 }

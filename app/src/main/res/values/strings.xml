@@ -20,7 +20,7 @@
         <item>Perempuan</item>
     </string-array>
     <string-array name="satuan">
-        <item>hidangan</item>
+        <item>porsi</item>
         <item>gram</item>
     </string-array>
     <string-array name="bulan">

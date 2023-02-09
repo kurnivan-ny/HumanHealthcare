@@ -5,18 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.navigation.findNavController
-import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.kurnivan_ny.humanhealthcare.databinding.FragmentPengaturanAkunBinding
 import com.kurnivan_ny.humanhealthcare.data.modelFirestore.User
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 
-/**
- * A simple [Fragment] subclass.
- * Use the [PengaturanAkunFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+
 class PengaturanAkunFragment : Fragment() {
 
     //BINDING
@@ -24,7 +20,6 @@ class PengaturanAkunFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var sharedPreferences: SharedPreferences
-//    lateinit var mDatabase: DatabaseReference
     lateinit var db: FirebaseFirestore
 
     private lateinit var sEmail: String
@@ -36,7 +31,7 @@ class PengaturanAkunFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentPengaturanAkunBinding.inflate(inflater, container, false)
         return binding.root
@@ -116,9 +111,9 @@ class PengaturanAkunFragment : Fragment() {
         if (sPasswordBaru.equals(sKonfirmasiPassBaru)){
             checkingPasswordLama( sPasswordLama, user)
         }
-//        else {
-//            Toast.makeText(activity, "Password Baru Tidak Sama Dengan Konfirmasi Password", Toast.LENGTH_LONG).show()
-//        }
+        else {
+            Toast.makeText(requireContext(), "Password Baru Tidak Sama Dengan Konfirmasi Password", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun checkingPasswordLama( sPasswordLama: String, data: User) {
@@ -126,9 +121,9 @@ class PengaturanAkunFragment : Fragment() {
             if (sPasswordLama.equals(sharedPreferences.getValuesString("password"))) {
                 savetoFirestore(data)
             }
-//            else {
-//                Toast.makeText(activity, "Password Lama Anda Salah", Toast.LENGTH_LONG).show()
-//            }
+            else {
+                Toast.makeText(requireContext(), "Password Lama Anda Salah", Toast.LENGTH_LONG).show()
+            }
         }
 
     private fun savetoFirestore(data: User) {
@@ -152,7 +147,4 @@ class PengaturanAkunFragment : Fragment() {
         sKonfirmasiPassBaru = binding.edtKonfirmasiPass.text.toString()
     }
 
-    private fun killActivity() {
-        activity?.finish()
-    }
 }

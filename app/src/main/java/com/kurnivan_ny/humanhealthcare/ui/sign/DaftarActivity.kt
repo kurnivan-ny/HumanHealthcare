@@ -80,24 +80,26 @@ class DaftarActivity : AppCompatActivity() {
             } else if (sPassword.equals("")){
                 binding.edtPassword.error = "Silakan isi Password"
                 binding.edtPassword.requestFocus()
-            } else if (sPassword.length<6){
+            } else if (sPassword.length < 6){
                 binding.edtPassword.error = "Password Anda masih kurang dari 6 karakter"
+                binding.edtPassword.requestFocus()
             }
             else {
 
                 val tanda_baca = arrayOf("&", "=", "_", "\'", "-", "+", ",","<", ">", ".", "/", "\"", "\\")
-                val statusList: MutableList<Int> = arrayListOf()
+                val detecttandaList: MutableList<Int> = arrayListOf()
                 for (tanda in tanda_baca){
-                    var statusUsername = sUsername.indexOf(tanda)
+                    val statusUsername = sUsername.indexOf(tanda)
                     if(statusUsername == -1){
                         continue
                     } else {
-                        statusList.add(statusUsername)
+                        detecttandaList.add(statusUsername)
+                        break
                     }
                 }
 
-                if (statusList.isEmpty()){
-                    var TotalEnergi:Float = predictRegressi(sJenisKelamin, sUmur, sTinggi, sBerat)
+                if (detecttandaList.isEmpty()){
+                    val TotalEnergi:Float = predictRegressi(sJenisKelamin, sUmur, sTinggi, sBerat)
                     saveUser(sNama, sJenisKelamin, sUmur, sTinggi, sBerat, sUsername, sEmail, sPassword, TotalEnergi)
                 } else {
                     binding.edtUsername.error = "Username tidak boleh terdapat karakter &=_'-+,<>./\"\\"
@@ -137,9 +139,7 @@ class DaftarActivity : AppCompatActivity() {
 
         user.totalenergikal = TotalEnergi
 
-        if (sUsername != null){
-            checkingUsername(sUsername, user)
-        }
+        checkingUsername(sUsername, user)
     }
 
     private fun checkingUsername(sUsername: String, data: User) {
@@ -189,7 +189,7 @@ class DaftarActivity : AppCompatActivity() {
 
         sUsername = binding.edtUsername.text.toString()
         sEmail = binding.edtEmail.text.toString()
-        sPassword = binding.edtUmur.text.toString()
+        sPassword = binding.edtPassword.text.toString()
     }
 
     private fun setUpForm() {
@@ -219,7 +219,7 @@ class DaftarActivity : AppCompatActivity() {
 
     private fun predictRegressi(sJenisKelamin: String, sUmur: String, sTinggi: String, sBerat: String): Float {
 
-        var TotalEnergi:Float = if (sJenisKelamin.equals("Laki-laki")){
+        val TotalEnergi:Float = if (sJenisKelamin.equals("Laki-laki")){
             val floatBufferInputs = FloatBuffer.wrap(
                 floatArrayOf(
                     sUmur.toFloat(),
@@ -250,7 +250,8 @@ class DaftarActivity : AppCompatActivity() {
         val ortSession = createORTSession(ortEnvironment)
         val output = runPrediction(floatBufferInputs, ortSession, ortEnvironment)
 
-        var TotalEnergi:Float = (String.format("%.2f", output).replace(",",".") + "F").toFloat()
+//        var TotalEnergi:Float = (String.format("%.2f", output).replace(",",".") + "F").toFloat()
+        val TotalEnergi:Float = (output.toString() + "F").replace(",",".").toFloat()
 
         return TotalEnergi
 

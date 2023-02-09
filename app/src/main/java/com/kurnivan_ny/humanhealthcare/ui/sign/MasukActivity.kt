@@ -30,14 +30,14 @@ class MasukActivity : AppCompatActivity() {
         sharedPreferences.setValuesString("onboarding", "1")
 
         binding.btnDaftar.setOnClickListener {
-            var intent = Intent(this@MasukActivity, DaftarActivity::class.java)
+            val intent = Intent(this@MasukActivity, DaftarActivity::class.java)
             startActivity(intent)
         }
 
         if(sharedPreferences.getValuesString("status").equals("1")){
             finishAffinity()
 
-            var goHome = Intent(this@MasukActivity, HomeActivity::class.java)
+            val goHome = Intent(this@MasukActivity, HomeActivity::class.java)
             startActivity(goHome)
         }
         

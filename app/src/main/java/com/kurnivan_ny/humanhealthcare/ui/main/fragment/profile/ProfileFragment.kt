@@ -17,11 +17,7 @@ import com.kurnivan_ny.humanhealthcare.databinding.FragmentProfileBinding
 import com.kurnivan_ny.humanhealthcare.ui.sign.MasukActivity
 import com.kurnivan_ny.humanhealthcare.viewmodel.preferences.SharedPreferences
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ProfileFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+
 class ProfileFragment : Fragment(), View.OnClickListener {
 
     //BINDING
@@ -35,7 +31,7 @@ class ProfileFragment : Fragment(), View.OnClickListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         return binding.root
@@ -64,7 +60,7 @@ class ProfileFragment : Fragment(), View.OnClickListener {
 
         binding.tvNama.setText(sharedPreferences.getValuesString("nama").toString())
 
-        var sUrl = sharedPreferences.getValuesString("url").toString()
+        val sUrl = sharedPreferences.getValuesString("url").toString()
 
         storage.reference.child("image_profile/$sUrl").downloadUrl.addOnSuccessListener { Uri ->
             Glide.with(this)
